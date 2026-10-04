@@ -1,3 +1,4 @@
+import { clearSigned } from '../lib/storage'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { supabase, toEmail } from '../lib/supabase'
 
@@ -35,6 +36,7 @@ export function AuthProvider({ children }) {
         const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
             setSession(s)
             if (!s) {
+                clearSigned()
                 setProfile(null)
                 setEditUntil(0)
                 setLoading(false)
