@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+@theme {
+  --color-kw-sky: #cfeaff;
+  --color-kw-sky-deep: #7cc4ff;
+  --color-kw-pink: #ff8fb8;
+  --color-kw-pink-soft: #ffe3ee;
+  --color-kw-pink-deep: #e8457f;
+  --color-kw-butter: #fff1b8;
+  --color-kw-butter-deep: #ffd966;
+  --color-kw-ink: #24478f;
+
+  --font-title: "Patrick Hand", cursive;
+  --font-body: "Nunito", sans-serif;
+
+  --animate-drift: drift 90s linear infinite;
+  --animate-twinkle: twinkle 3s ease-in-out infinite;
+  --animate-rise: rise 16s linear infinite;
+  --animate-heartbeat: heartbeat 1.6s ease-in-out infinite;
+  --animate-shine: shine 0.9s ease-in-out;
+  --animate-sway: sway 4s ease-in-out infinite;
+  --animate-eq: eq 0.9s ease-in-out infinite;
+  --animate-wiggle: wiggle 0.6s ease-in-out;
+
+    --animate-marquee: marquee 70s linear infinite;
+  --animate-slow-spin: slow-spin 120s linear infinite;
+  --animate-shoot: shoot 9s ease-in infinite;
+  --animate-dash: dash 7s linear infinite;
+
+  @keyframes marquee {
+    to { transform: translateX(-50%); }
+  }
+  @keyframes slow-spin {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes shoot {
+    0% { transform: translate(0, 0) rotate(-35deg); opacity: 0; }
+    2% { opacity: 1; }
+    14% { transform: translate(-70vw, 48vh) rotate(-35deg); opacity: 0; }
+    100% { transform: translate(-70vw, 48vh) rotate(-35deg); opacity: 0; }
+  }
+  @keyframes dash {
+    to { stroke-dashoffset: -100; }
+  }
+  
+  @keyframes drift {
+    from { transform: translateX(-40vw); }
+    to { transform: translateX(130vw); }
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.35; transform: scale(0.8) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1.15) rotate(12deg); }
+  }
+  @keyframes rise {
+    0% { transform: translateY(105vh); opacity: 0; }
+    10% { opacity: 0.8; }
+    100% { transform: translateY(-15vh); opacity: 0; }
+  }
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.25); }
+  }
+  @keyframes shine {
+    0% { transform: translateX(0) skewX(-12deg); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translateX(560%) skewX(-12deg); opacity: 0; }
+  }
+  @keyframes sway {
+    0%, 100% { transform: rotate(-4deg); }
+    50% { transform: rotate(4deg); }
+  }
+  @keyframes eq {
+    0%, 100% { transform: scaleY(0.25); }
+    50% { transform: scaleY(1); }
+  }
+  @keyframes wiggle {
+    0%, 100% { rotate: 0deg; }
+    25% { rotate: -12deg; }
+    75% { rotate: 12deg; }
+  }
+}
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body);
+    color: var(--color-kw-ink);
+    background: #e6f4ff;
+    -webkit-tap-highlight-color: transparent;
+  }
+  ::selection { background: var(--color-kw-pink-soft); color: var(--color-kw-pink-deep); }
+  :focus-visible {
+    outline: 3px solid var(--color-kw-pink-deep);
+    outline-offset: 3px;
+    border-radius: 12px;
+  }
+  img { -webkit-user-drag: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
