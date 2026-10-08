@@ -1,3 +1,4 @@
+import useProgress from '../hooks/useProgress'
 import { FiCheck, FiLock } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
 import Card from '../components/ui/Card'
@@ -6,12 +7,11 @@ import Sticker from '../components/ui/Sticker'
 import Reveal from '../components/ui/Reveal'
 import { Sprite } from '../games/icons'
 import { GAMES } from '../data/games'
-import { getProgress } from '../utils/progress'
 
 const BADGE = { cinnamoroll: 'star', fresitas: 'strawberry', pompompurin: 'flan' }
 
 export default function Games() {
-    const { completed } = getProgress()
+    const { completed } = useProgress()
     const done = GAMES.filter((g) => completed[g.id]).length
     const all = done === GAMES.length
 

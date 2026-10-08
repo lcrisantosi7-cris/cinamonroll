@@ -1,10 +1,10 @@
 import { useState } from 'react'
 
-export default function BlurImage({ src, blur, alt = '', className = '', imgClassName = '' }) {
+export default function BlurImage({ src, blur, alt = '', className = '', imgClassName = '', style }) {
     const [loaded, setLoaded] = useState(false)
 
     return (
-        <div className={`relative overflow-hidden bg-kw-pink-soft ${className}`}>
+        <div className={`relative overflow-hidden bg-kw-pink-soft ${className}`} style={style}>
             {blur && (
                 <div
                     aria-hidden

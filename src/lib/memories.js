@@ -24,7 +24,7 @@ export function friendlyError(e) {
     }
     if (m.includes('mime')) return 'Uno de los archivos tiene un formato no permitido.'
     if (m.includes('row-level security') || m.includes('policy')) {
-        return 'No tienes permiso para guardar esto. Cierra sesión y vuelve a entrar.'
+        return 'No tienes permiso para hacer esto. Cierra sesión y vuelve a entrar.'
     }
     if (m.includes('fetch') || m.includes('network')) {
         return 'Se cortó la conexión. Revisa tu internet e inténtalo otra vez.'
@@ -40,12 +40,10 @@ async function upload(path, blob, contentType) {
     return path
 }
 
-export async function createMemory({
-    userId, title, description, date, inGallery, inTimeline, files, onProgress,
-}) {
+// Prepara y sube los archivos; devuelve las filas listas para guardar en "media"
+async function uploadFiles({ userId, memoryId, files, startPosition = 0, onProgress }) {
     const total = files.length
 
-    // 1) Preparar todo en el navegador (si algo falla, aún no se subió nada)
     const prepared = []
     for (let i = 0; i < total; i++) {
         onProgress?.({ phase: 'prepare', done: i, total })
@@ -53,14 +51,13 @@ export async function createMemory({
         prepared.push(f.type.startsWith('video/') ? await processVideo(f) : await processImage(f))
     }
 
-    // 2) Subir al almacenamiento privado
-    const memoryId = crypto.randomUUID()
     const rows = []
     for (let i = 0; i < total; i++) {
         onProgress?.({ phase: 'upload', done: i, total })
         const p = prepared[i]
         const mediaId = crypto.randomUUID()
         const base = `${userId}/${memoryId}/${mediaId}`
+        const position = startPosition + i
 
         if (p.kind === 'image') {
             const ext = extOf(p.full)
@@ -74,7 +71,7 @@ export async function createMemory({
                 height: p.height,
                 bytes: p.full.size,
                 blur: p.blur,
-                position: i,
+                position,
             })
         } else {
             const file = files[i]
@@ -88,13 +85,20 @@ export async function createMemory({
                 duration_s: p.duration,
                 bytes: file.size,
                 blur: p.blur,
-                position: i,
+                position,
             })
         }
     }
+    return rows
+}
 
-    // 3) Guardar el recuerdo y sus archivos
-    onProgress?.({ phase: 'save', done: total, total })
+export async function createMemory({
+    userId, title, description, date, inGallery, inTimeline, inSurprise = false, icon, files, onProgress,
+}) {
+    const memoryId = crypto.randomUUID()
+    const rows = await uploadFiles({ userId, memoryId, files, onProgress })
+
+    onProgress?.({ phase: 'save', done: files.length, total: files.length })
     const { error: memError } = await supabase.from('memories').insert({
         id: memoryId,
         title,
@@ -102,13 +106,24 @@ export async function createMemory({
         memory_date: date,
         in_gallery: inGallery,
         in_timeline: inTimeline,
+        in_surprise: inSurprise,
+        icon,
     })
     if (memError) throw memError
 
-    const { error: mediaError } = await supabase.from('media').insert(rows)
-    if (mediaError) {
-        await supabase.from('memories').update({ is_active: false }).eq('id', memoryId)
-        throw mediaError
+    if (rows.length) {
+        const { error: mediaError } = await supabase.from('media').insert(rows)
+        if (mediaError) {
+            await supabase.from('memories').update({ is_active: false }).eq('id', memoryId)
+            throw mediaError
+        }
     }
     return memoryId
+}
+
+export async function addMedia({ userId, memoryId, files, startPosition, onProgress }) {
+    const rows = await uploadFiles({ userId, memoryId, files, startPosition, onProgress })
+    if (!rows.length) return
+    const { error } = await supabase.from('media').insert(rows)
+    if (error) throw error
 }

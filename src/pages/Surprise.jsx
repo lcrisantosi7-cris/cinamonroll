@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import GiftBox from '../components/surprise/GiftBox'
 import LockedView from '../components/surprise/LockedView'
 import Orbit from '../components/surprise/Orbit'
 import RevealView from '../components/surprise/RevealView'
 import Celebration from '../components/surprise/Celebration'
-import { FINAL } from '../data/surprise'
+import PageLoader from '../components/ui/PageLoader'
+import useProgress from '../hooks/useProgress'
 import { GAMES } from '../data/games'
-import { getProgress, markOpened } from '../utils/progress'
+import { fetchSettings, openGift } from '../lib/content'
 import { heartBurst, starBurst } from '../utils/confettiHearts'
 
 const NEEDED = 3
@@ -22,15 +24,11 @@ const fade = {
     transition: { duration: 0.4 },
 }
 
-export default function Surprise() {
-    const { search } = useLocation()
-    const [progress] = useState(getProgress)
-    // /sorpresa?abrir solo funciona con npm run dev, para probar
-    const force = import.meta.env.DEV && new URLSearchParams(search).has('abrir')
-    const unlocked = !FINAL.requireGames || force || GAMES.every((g) => progress.completed[g.id])
+function SurpriseFlow({ completed, giftOpened, requireGames, force }) {
+    const unlocked = !requireGames || force || GAMES.every((g) => completed[g.id])
 
     const [stage, setStage] = useState(() =>
-        !unlocked ? 'locked' : progress.opened ? 'reveal' : 'unlock'
+        !unlocked ? 'locked' : giftOpened ? 'reveal' : 'unlock'
     ) // locked | unlock | gift | reveal
     const [taps, setTaps] = useState(0)
     const [opening, setOpening] = useState(false)
@@ -60,7 +58,7 @@ export default function Surprise() {
         if (next >= NEEDED) {
             setOpening(true)
             setFlash(true)
-            markOpened()
+            openGift().catch(() => { })
             setTimeout(() => {
                 heartBurst({ particleCount: 140, spread: 130, startVelocity: 50, origin: { y: 0.55 } })
                 starBurst({ particleCount: 100, spread: 130, startVelocity: 45, origin: { y: 0.55 } })
@@ -85,7 +83,7 @@ export default function Surprise() {
                 <AnimatePresence mode="wait">
                     {stage === 'locked' && (
                         <motion.div key="locked" {...fade}>
-                            <LockedView games={GAMES} completed={progress.completed} />
+                            <LockedView games={GAMES} completed={completed} />
                         </motion.div>
                     )}
 
@@ -112,8 +110,7 @@ export default function Surprise() {
                                 {Array.from({ length: NEEDED }).map((_, i) => (
                                     <span
                                         key={i}
-                                        className={`size-3 rounded-full transition-colors ${i < taps ? 'bg-kw-pink' : 'bg-white/80'
-                                            }`}
+                                        className={`size-3 rounded-full transition-colors ${i < taps ? 'bg-kw-pink' : 'bg-white/80'}`}
                                     />
                                 ))}
                             </div>
@@ -154,5 +151,24 @@ export default function Surprise() {
                 )}
             </AnimatePresence>
         </>
+    )
+}
+
+export default function Surprise() {
+    const { search } = useLocation()
+    const progress = useProgress()
+    const settings = useQuery({ queryKey: ['settings'], queryFn: fetchSettings })
+    // En desarrollo, ?abrir salta el bloqueo visual (la base igual protege los datos)
+    const force = import.meta.env.DEV && new URLSearchParams(search).has('abrir')
+
+    if (progress.isPending || settings.isPending) return <PageLoader />
+
+    return (
+        <SurpriseFlow
+            completed={progress.completed}
+            giftOpened={progress.giftOpened}
+            requireGames={settings.data?.require_games ?? true}
+            force={force}
+        />
     )
 }

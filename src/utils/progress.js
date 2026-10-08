@@ -1,3 +1,5 @@
+import { completeGame } from '../lib/content'
+
 const KEY = 'novia-progress-v1'
 const EMPTY = { completed: {}, redeemed: {}, lettersRead: {}, opened: false }
 
@@ -20,8 +22,7 @@ const write = (data) => {
 export const getProgress = () => read()
 
 export const markCompleted = (id) => {
-    const d = read()
-    write({ ...d, completed: { ...d.completed, [id]: true } })
+    completeGame(id).catch(() => { })
 }
 
 export const redeemCoupon = (id) => {

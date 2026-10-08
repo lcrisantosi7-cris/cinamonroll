@@ -11,7 +11,7 @@ export default function useAudio(tracks) {
     useEffect(() => {
         if (!has) return
         const audio = new Audio()
-        audio.preload = 'metadata'
+        audio.preload = 'none'
         audioRef.current = audio
 
         const onEnded = () => setIndex((i) => (i + 1) % tracks.length)

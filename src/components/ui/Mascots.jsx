@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
-import papaImg from '../../assets/images/characters/papa-lili.png'
-import camoteImg from '../../assets/images/characters/camote-luis.png'
+import papaImg from '../../assets/images/characters/papa-lili.webp'
+import camoteImg from '../../assets/images/characters/camote-luis.webp'
 
 export function Papa({ className = '' }) {
     return (

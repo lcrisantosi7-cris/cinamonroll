@@ -1,4 +1,4 @@
-import { useState } from 'react'
+
 import { FiCheck, FiGift, FiLock } from 'react-icons/fi'
 import Card from '../ui/Card'
 import ButtonLink from '../ui/ButtonLink'
@@ -6,10 +6,10 @@ import Sticker from '../ui/Sticker'
 import AssetIcon from '../ui/AssetIcon'
 import Reveal from '../ui/Reveal'
 import { GAMES } from '../../data/games'
-import { getProgress } from '../../utils/progress'
+import useProgress from '../../hooks/useProgress'
 
 export default function GamesSurprise() {
-    const [completed] = useState(() => getProgress().completed)
+    const { completed } = useProgress()
     const done = GAMES.filter((g) => completed[g.id]).length
     const ready = done === GAMES.length
 

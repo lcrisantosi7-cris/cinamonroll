@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { FiCheck, FiPlay, FiPlus, FiX } from 'react-icons/fi'
 import Switch from './Switch'
+import IconPicker from './IconPicker'
 import { useAuth } from '../../context/AuthContext'
 import { createMemory, friendlyError, MAX_FILES, validateFile } from '../../lib/memories'
 import { readExifDate, todayISO } from '../../lib/imageTools'
@@ -11,8 +13,9 @@ import { formatDate } from '../../utils/formatDate'
 const input =
     'w-full rounded-2xl border-2 border-kw-sky-deep/40 bg-white px-4 py-3 text-base outline-none transition focus:border-kw-pink'
 
-export default function NewMemory({ onCreated }) {
+export default function NewMemory() {
     const { profile } = useAuth()
+    const qc = useQueryClient()
     const [items, setItems] = useState([])
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
@@ -20,6 +23,8 @@ export default function NewMemory({ onCreated }) {
     const [exifDate, setExifDate] = useState(null)
     const [inGallery, setInGallery] = useState(true)
     const [inTimeline, setInTimeline] = useState(false)
+    const [inSurprise, setInSurprise] = useState(false)
+    const [icon, setIcon] = useState('generico')
     const [progress, setProgress] = useState(null)
     const [error, setError] = useState('')
     const [ok, setOk] = useState(false)
@@ -65,7 +70,8 @@ export default function NewMemory({ onCreated }) {
     }
 
     const busy = !!progress
-    const canSend = !busy && title.trim() && items.length > 0 && (inGallery || inTimeline)
+    const needsFiles = inGallery && items.length === 0
+    const canSend = !busy && title.trim() && (inGallery || inTimeline || inSurprise) && !needsFiles
 
     const submit = async (e) => {
         e.preventDefault()
@@ -81,6 +87,8 @@ export default function NewMemory({ onCreated }) {
                 date,
                 inGallery,
                 inTimeline,
+                inSurprise,
+                icon,
                 files: items.map((i) => i.file),
                 onProgress: setProgress,
             })
@@ -91,8 +99,10 @@ export default function NewMemory({ onCreated }) {
             setDescription('')
             setDate(todayISO())
             setExifDate(null)
+            setIcon('generico')
+            setInSurprise(false)
             setOk(true)
-            onCreated?.()
+            qc.invalidateQueries({ queryKey: ['memories'] })
         } catch (err) {
             setError(friendlyError(err))
         } finally {
@@ -251,8 +261,27 @@ export default function NewMemory({ onCreated }) {
                     label="Mostrar en la línea de tiempo"
                     hint="Aparece como un capítulo de nuestra historia"
                 />
-                {!inGallery && !inTimeline && (
+                <Switch
+                    checked={inSurprise}
+                    onChange={setInSurprise}
+                    label="Para la sorpresa final"
+                    hint="Solo se ve cuando se abre el regalo"
+                />
+
+                {inTimeline && (
+                    <div>
+                        <p className="mb-2 text-sm font-bold">Ícono en la línea de tiempo</p>
+                        <IconPicker value={icon} onChange={setIcon} />
+                    </div>
+                )}
+
+                {!inGallery && !inTimeline && !inSurprise && (
                     <p className="text-sm font-bold text-rose-500">Elige al menos un lugar donde mostrarlo.</p>
+                )}
+                {needsFiles && (
+                    <p className="text-sm font-bold text-rose-500">
+                        Para la galería necesitas al menos una foto o un video.
+                    </p>
                 )}
             </div>
 

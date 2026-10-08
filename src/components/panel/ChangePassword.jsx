@@ -13,7 +13,7 @@ export default function ChangePassword() {
 
     const submit = async (e) => {
         e.preventDefault()
-        if (pwd.length < 12) return setMsg({ ok: false, text: 'Usa al menos 12 caracteres.' })
+        if (pwd.length < 8) return setMsg({ ok: false, text: 'Usa al menos 8 caracteres.' })
         if (pwd !== again) return setMsg({ ok: false, text: 'Las contraseñas no coinciden.' })
 
         setBusy(true)
@@ -43,7 +43,7 @@ export default function ChangePassword() {
             <h2 className="inline-flex items-center gap-2 font-title text-3xl">
                 <FiKey /> Mi contraseña
             </h2>
-            <p className="text-sm font-semibold text-kw-ink/70">Elige una que solo tú sepas (mínimo 12 caracteres).</p>
+            <p className="text-sm font-semibold text-kw-ink/70">Elige una que solo tú sepas (mínimo 8 caracteres).</p>
 
             <div className="mt-4 space-y-3">
                 <input

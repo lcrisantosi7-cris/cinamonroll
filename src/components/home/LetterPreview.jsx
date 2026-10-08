@@ -1,11 +1,26 @@
+import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { FiArrowRight } from 'react-icons/fi'
 import Card from '../ui/Card'
 import ButtonLink from '../ui/ButtonLink'
 import Sticker from '../ui/Sticker'
-import { LETTER } from '../../data/letter'
+import { fetchLetterBody, fetchLetters } from '../../lib/content'
+
+const isLocked = (l) => !!l.unlockAt && new Date(l.unlockAt) > new Date()
 
 export default function LetterPreview() {
+    const { data: letters } = useQuery({ queryKey: ['letters'], queryFn: fetchLetters })
+    const first = letters?.find((l) => !isLocked(l))
+    const { data: body } = useQuery({
+        queryKey: ['letter-body', first?.id],
+        queryFn: () => fetchLetterBody(first.id),
+        enabled: !!first,
+    })
+
+    const text = body
+        ? [body.greeting, ...(body.paragraphs ?? [])].filter(Boolean).slice(0, 3).join(' ')
+        : 'Una carta escrita con todo mi corazón, solo para ti.'
+
     return (
         <Card tone="pink" tilt className="flex h-full flex-col">
             <Sticker name="decor/bow" float className="absolute -top-6 left-1/2 w-16 -translate-x-1/2" />
@@ -27,7 +42,7 @@ export default function LetterPreview() {
                             'repeating-linear-gradient(to bottom, transparent 0, transparent 27px, #ffd9e6 27px, #ffd9e6 28px)',
                     }}
                 >
-                    <p className="line-clamp-5 font-title text-xl leading-7 text-kw-ink">{LETTER.preview}</p>
+                    <p className="line-clamp-5 font-title text-xl leading-7 text-kw-ink">{text}</p>
                 </div>
             </motion.div>
 

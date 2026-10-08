@@ -14,14 +14,14 @@ if (!username || !displayName || !/^[a-z0-9_]{3,20}$/.test(username)) {
     process.exit(1)
 }
 
-const password = await askHidden('Contraseña (mínimo 12 caracteres): ')
+const password = await askHidden('Contraseña (mínimo 8 caracteres): ')
 const again = await askHidden('Repite la contraseña: ')
 if (password !== again) {
     console.error('Las contraseñas no coinciden.')
     process.exit(1)
 }
-if (password.length < 12) {
-    console.error('La contraseña debe tener al menos 12 caracteres.')
+if (password.length < 8) {
+    console.error('La contraseña debe tener al menos 8 caracteres.')
     process.exit(1)
 }
 

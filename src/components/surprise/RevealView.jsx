@@ -1,13 +1,20 @@
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { FiChevronDown, FiHeart, FiRotateCcw } from 'react-icons/fi'
 import Sparkle from '../ui/Sparkle'
 import ButtonLink from '../ui/ButtonLink'
+import PageLoader from '../ui/PageLoader'
 import { Duo } from '../ui/Mascots'
 import Coupon from './Coupon'
-import { FINAL, FINAL_PHOTOS } from '../../data/surprise'
-import { video } from '../../assets'
-import { getProgress, redeemCoupon } from '../../utils/progress'
+import useSignedUrls from '../../hooks/useSignedUrls'
+import {
+    fetchCoupons,
+    fetchRedemptions,
+    fetchSurprise,
+    fetchSurpriseMedia,
+    redeemCoupon,
+} from '../../lib/content'
 import { heartRain } from '../../utils/confettiHearts'
 
 const WASHI = {
@@ -94,17 +101,19 @@ function DevelopingPhoto({ src, caption, rotate = 2 }) {
                 style={WASHI}
             />
             <div className="relative aspect-[4/5] overflow-hidden rounded bg-kw-pink-soft">
-                <motion.img
-                    src={src}
-                    alt={caption || 'Foto de nosotros'}
-                    loading="lazy"
-                    draggable={false}
-                    initial={{ filter: 'grayscale(1) blur(10px) brightness(1.4)', opacity: 0.6 }}
-                    whileInView={{ filter: 'grayscale(0) blur(0px) brightness(1)', opacity: 1 }}
-                    viewport={{ once: true, amount: 0.5 }}
-                    transition={{ duration: 2.2, delay: 0.3 }}
-                    className="size-full object-cover"
-                />
+                {src && (
+                    <motion.img
+                        src={src}
+                        alt={caption || 'Foto de nosotros'}
+                        loading="lazy"
+                        draggable={false}
+                        initial={{ filter: 'grayscale(1) blur(10px) brightness(1.4)', opacity: 0.6 }}
+                        whileInView={{ filter: 'grayscale(0) blur(0px) brightness(1)', opacity: 1 }}
+                        viewport={{ once: true, amount: 0.5 }}
+                        transition={{ duration: 2.2, delay: 0.3 }}
+                        className="size-full object-cover"
+                    />
+                )}
                 <motion.span
                     aria-hidden
                     initial={{ opacity: 1 }}
@@ -153,18 +162,32 @@ function Ticket({ reveal }) {
 }
 
 export default function RevealView({ onReplay }) {
-    const [redeemed, setRedeemed] = useState(() => getProgress().redeemed)
-    const videoUrl = FINAL.video ? video(FINAL.video) : null
-    const count = FINAL.coupons.filter((c) => redeemed[c.id]).length
+    const contentQ = useQuery({ queryKey: ['surprise'], queryFn: fetchSurprise })
+    const couponsQ = useQuery({ queryKey: ['coupons'], queryFn: fetchCoupons })
+    const redQ = useQuery({ queryKey: ['redemptions'], queryFn: fetchRedemptions })
+    const mediaQ = useQuery({ queryKey: ['surprise-media'], queryFn: fetchSurpriseMedia })
+
+    const c = contentQ.data ?? {}
+    const paragraphs = c.paragraphs ?? []
+    const coupons = useMemo(() => couponsQ.data ?? [], [couponsQ.data])
+    const redeemed = useMemo(
+        () => Object.fromEntries((redQ.data ?? []).map((r) => [r.coupon_id, true])),
+        [redQ.data]
+    )
+    const photos = (mediaQ.data ?? []).filter((m) => m.kind === 'image')
+    const video = (mediaQ.data ?? []).find((m) => m.kind === 'video')
+    const urls = useSignedUrls([
+        ...photos.map((p) => p.path_medium),
+        video?.path_full,
+        video?.path_thumb,
+    ])
+    const count = coupons.filter((x) => redeemed[x.id]).length
 
     useEffect(() => {
-        heartRain(2600)
-    }, [])
+        if (!contentQ.isPending) heartRain(2600)
+    }, [contentQ.isPending])
 
-    const onRedeem = (id) => {
-        redeemCoupon(id)
-        setRedeemed((r) => ({ ...r, [id]: true }))
-    }
+    if (contentQ.isPending) return <PageLoader />
 
     return (
         <div>
@@ -172,7 +195,7 @@ export default function RevealView({ onReplay }) {
                 <div>
                     <Sparkle className="mx-auto mb-3 size-8 animate-twinkle text-kw-butter-deep" />
                     <SplitText
-                        text={FINAL.title}
+                        text={c.title ?? 'Esto es para ti'}
                         delay={0.3}
                         className="font-title text-[clamp(2.6rem,11vw,5rem)] leading-[1.05]"
                     />
@@ -195,28 +218,28 @@ export default function RevealView({ onReplay }) {
             </header>
 
             <section className="py-10">
-                {FINAL.paragraphs.map((p, i) => (
+                {paragraphs.map((p, i) => (
                     <Fragment key={i}>
                         <Scene text={p} />
-                        {i < FINAL.paragraphs.length - 1 && <Divider />}
+                        {i < paragraphs.length - 1 && <Divider />}
                     </Fragment>
                 ))}
             </section>
 
-            {FINAL_PHOTOS.length > 0 && (
+            {photos.length > 0 && (
                 <section className="mt-16 flex flex-col items-center gap-12 sm:flex-row sm:flex-wrap sm:justify-center">
-                    {FINAL_PHOTOS.map((p, i) => (
+                    {photos.map((p, i) => (
                         <DevelopingPhoto
-                            key={p.src}
-                            src={p.src}
-                            caption={i === 0 ? FINAL.photoCaption : ''}
+                            key={p.id}
+                            src={urls[p.path_medium]}
+                            caption={i === 0 ? c.photoCaption : ''}
                             rotate={i % 2 === 0 ? 2 : -3}
                         />
                     ))}
                 </section>
             )}
 
-            {videoUrl && (
+            {video && (
                 <motion.section
                     initial={{ opacity: 0, y: 40 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -227,46 +250,49 @@ export default function RevealView({ onReplay }) {
                         controls
                         playsInline
                         preload="metadata"
-                        src={videoUrl}
+                        src={urls[video.path_full]}
+                        poster={urls[video.path_thumb]}
                         className="w-full rounded-4xl border-4 border-white shadow-2xl shadow-pink-300/50"
                     />
                 </motion.section>
             )}
 
-            {FINAL.reveal && (
+            {c.reveal && (
                 <section className="mt-20">
-                    <Ticket reveal={FINAL.reveal} />
+                    <Ticket reveal={c.reveal} />
                 </section>
             )}
 
-            <section className="mt-24">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="text-center"
-                >
-                    <h2 className="font-title text-4xl">Tus cupones de amor</h2>
-                    <p className="mt-1 text-sm font-semibold text-kw-ink/80">
-                        Canjea el que quieras, cuando quieras. Cuando lo hagas, avísame y lo cumplo.
-                    </p>
-                    <p className="mt-3 inline-block rounded-full bg-white/80 px-4 py-1 text-sm font-bold shadow">
-                        Canjeados {count} de {FINAL.coupons.length}
-                    </p>
-                </motion.div>
+            {coupons.length > 0 && (
+                <section className="mt-24">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="text-center"
+                    >
+                        <h2 className="font-title text-4xl">Tus cupones de amor</h2>
+                        <p className="mt-1 text-sm font-semibold text-kw-ink/80">
+                            Canjea el que quieras, cuando quieras. Cuando lo hagas, avísame y lo cumplo.
+                        </p>
+                        <p className="mt-3 inline-block rounded-full bg-white/80 px-4 py-1 text-sm font-bold shadow">
+                            Canjeados {count} de {coupons.length}
+                        </p>
+                    </motion.div>
 
-                <ul className="mx-auto mt-8 max-w-xl space-y-5">
-                    {FINAL.coupons.map((c, i) => (
-                        <Coupon
-                            key={c.id}
-                            coupon={c}
-                            index={i}
-                            redeemed={!!redeemed[c.id]}
-                            onRedeem={onRedeem}
-                        />
-                    ))}
-                </ul>
-            </section>
+                    <ul className="mx-auto mt-8 max-w-xl space-y-5">
+                        {coupons.map((cp, i) => (
+                            <Coupon
+                                key={cp.id}
+                                coupon={{ id: cp.id, title: cp.title, text: cp.body, img: cp.icon }}
+                                index={i}
+                                redeemed={!!redeemed[cp.id]}
+                                onRedeem={(id) => redeemCoupon(id).catch(() => { })}
+                            />
+                        ))}
+                    </ul>
+                </section>
+            )}
 
             <section className="mt-28 text-center">
                 <motion.p
@@ -276,7 +302,7 @@ export default function RevealView({ onReplay }) {
                     transition={{ duration: 1.8, ease: 'easeInOut' }}
                     className="font-title text-[clamp(1.8rem,6vw,2.8rem)] text-kw-pink-deep"
                 >
-                    {FINAL.signature}
+                    {c.signature}
                 </motion.p>
                 <Duo className="mt-6" />
                 <div className="mt-6 flex flex-wrap justify-center gap-3">

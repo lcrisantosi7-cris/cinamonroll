@@ -7,7 +7,6 @@ import { useAuth } from '../context/AuthContext'
 
 export default function Panel() {
     const { profile, editUntil, lockEdit } = useAuth()
-    const [refreshKey, setRefreshKey] = useState(0)
     const [minutes, setMinutes] = useState(() => Math.ceil((editUntil - Date.now()) / 60000))
 
     useEffect(() => {
@@ -34,10 +33,10 @@ export default function Panel() {
 
             <div className="mt-8 grid items-start gap-6 lg:grid-cols-[1.1fr_1fr]">
                 <div className="space-y-6">
-                    <NewMemory onCreated={() => setRefreshKey((k) => k + 1)} />
+                    <NewMemory />
                     <ChangePassword />
                 </div>
-                <MyMemories refreshKey={refreshKey} />
+                <MyMemories />
             </div>
         </section>
     )

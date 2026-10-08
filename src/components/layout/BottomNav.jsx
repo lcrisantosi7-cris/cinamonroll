@@ -6,7 +6,7 @@ import {
 } from 'react-icons/fi'
 import { NAV } from '../../data/config'
 import { GAMES } from '../../data/games'
-import { getProgress } from '../../utils/progress'
+import useProgress from '../../hooks/useProgress'
 import { usePlayer } from '../../context/AudioContext'
 import AssetIcon from '../ui/AssetIcon'
 
@@ -18,11 +18,6 @@ const TONES = {
     purple: 'from-purple-50 to-purple-200 border-purple-200 text-purple-500',
 }
 
-const status = () => {
-    const p = getProgress()
-    const done = GAMES.every((g) => p.completed[g.id])
-    return { locked: !done, ready: done && !p.opened }
-}
 
 function MoreTile({ item, locked }) {
     const Icon = item.icon
@@ -86,7 +81,9 @@ function MiniPlayer() {
 export default function BottomNav() {
     const { pathname } = useLocation()
     const [open, setOpen] = useState(false)
-    const [state, setState] = useState(status)
+    const { completed, giftOpened } = useProgress()
+    const allDone = GAMES.every((g) => completed[g.id])
+    const state = { locked: !allDone, ready: allDone && !giftOpened }
 
     const bar = NAV.filter((n) => n.bar)
     const more = NAV.filter((n) => !n.bar)
@@ -98,7 +95,6 @@ export default function BottomNav() {
 
     useEffect(() => {
         if (!open) return
-        setState(status())
         const onKey = (e) => e.key === 'Escape' && setOpen(false)
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)

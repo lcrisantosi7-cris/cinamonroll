@@ -9,9 +9,9 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !username) {
     process.exit(1)
 }
 
-const password = await askHidden('Nueva contraseña (mínimo 12 caracteres): ')
-if (password.length < 12) {
-    console.error('La contraseña debe tener al menos 12 caracteres.')
+const password = await askHidden('Nueva contraseña (mínimo 8 caracteres): ')
+if (password.length < 8) {
+    console.error('La contraseña debe tener al menos 8 caracteres.')
     process.exit(1)
 }
 

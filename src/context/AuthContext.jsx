@@ -24,21 +24,27 @@ export function AuthProvider({ children }) {
     const [profile, setProfile] = useState(null)
     const [loading, setLoading] = useState(true)
     const [editUntil, setEditUntil] = useState(0)
-    const [, tick] = useState(0)
+    const [canEdit, setCanEdit] = useState(false)
 
     useEffect(() => {
         let alive = true
-        supabase.auth.getSession().then(({ data }) => {
-            if (!alive) return
-            setSession(data.session)
-            if (!data.session) setLoading(false)
-        })
+        supabase.auth
+            .getSession()
+            .then(({ data }) => {
+                if (!alive) return
+                setSession(data.session)
+                if (!data.session) setLoading(false)
+            })
+            .catch(() => {
+                if (alive) setLoading(false)
+            })
         const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
             setSession(s)
             if (!s) {
                 clearSigned()
                 setProfile(null)
                 setEditUntil(0)
+                setCanEdit(false)
                 setLoading(false)
             }
         })
@@ -59,20 +65,28 @@ export function AuthProvider({ children }) {
             .maybeSingle()
             .then(({ data, error }) => {
                 if (!alive) return
+                // Error de red: no cerramos la sesión, solo dejamos de cargar
+                if (error) {
+                    setLoading(false)
+                    return
+                }
                 // Una cuenta sin perfil no es miembro: se cierra la sesión
-                if (error || !data) supabase.auth.signOut()
+                if (!data) supabase.auth.signOut()
                 else setProfile(data)
                 setLoading(false)
+            })
+            .catch(() => {
+                if (alive) setLoading(false)
             })
         return () => {
             alive = false
         }
     }, [uid])
 
+    // Al vencer los 15 minutos, se vuelve a bloquear la edición
     useEffect(() => {
-        const left = editUntil - Date.now()
-        if (left <= 0) return
-        const id = setTimeout(() => tick((n) => n + 1), left + 50)
+        if (editUntil <= 0) return
+        const id = setTimeout(() => setCanEdit(false), Math.max(editUntil - Date.now(), 0))
         return () => clearTimeout(id)
     }, [editUntil])
 
@@ -98,12 +112,16 @@ export function AuthProvider({ children }) {
             })
             if (error) return { ok: false, message: friendly(error) }
             setEditUntil(Date.now() + EDIT_WINDOW_MS)
+            setCanEdit(true)
             return { ok: true }
         },
         [session]
     )
 
-    const lockEdit = useCallback(() => setEditUntil(0), [])
+    const lockEdit = useCallback(() => {
+        setEditUntil(0)
+        setCanEdit(false)
+    }, [])
 
     const value = useMemo(
         () => ({
@@ -111,16 +129,17 @@ export function AuthProvider({ children }) {
             profile,
             loading,
             editUntil,
-            canEdit: editUntil > Date.now(),
+            canEdit,
             signIn,
             signOut,
             confirmEdit,
             lockEdit,
         }),
-        [session, profile, loading, editUntil, signIn, signOut, confirmEdit, lockEdit]
+        [session, profile, loading, editUntil, canEdit, signIn, signOut, confirmEdit, lockEdit]
     )
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext)

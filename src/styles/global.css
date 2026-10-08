@@ -10,8 +10,8 @@
   --color-kw-butter-deep: #ffd966;
   --color-kw-ink: #24478f;
 
-  --font-title: "Patrick Hand", cursive;
-  --font-body: "Nunito", sans-serif;
+  --font-title: "Patrick Hand", ui-rounded, cursive;
+  --font-body: "Nunito Variable", ui-sans-serif, system-ui, sans-serif;
 
   --animate-drift: drift 90s linear infinite;
   --animate-twinkle: twinkle 3s ease-in-out infinite;

@@ -1,31 +1,31 @@
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
-import confetti from 'canvas-confetti'
 import { FiGift, FiHeart } from 'react-icons/fi'
 import Card from '../components/ui/Card'
-import { MESSAGES } from '../data/messages'
+import PageLoader from '../components/ui/PageLoader'
 import { Papa, Camote } from '../components/ui/Mascots'
+import { fetchMessages } from '../lib/content'
+import { heartBurst } from '../utils/confettiHearts'
 
 const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5)
 
 export default function Messages() {
+    const { data, isPending } = useQuery({ queryKey: ['messages'], queryFn: fetchMessages })
+    const messages = useMemo(() => (data ?? []).map((m) => m.body), [data])
     const bag = useRef([])
     const [current, setCurrent] = useState(null)
     const [count, setCount] = useState(0)
 
     const draw = () => {
-        if (bag.current.length === 0) bag.current = shuffle(MESSAGES)
+        if (!messages.length) return
+        if (bag.current.length === 0) bag.current = shuffle(messages)
         setCurrent(bag.current.pop())
         setCount((c) => c + 1)
-        confetti({
-            particleCount: 30,
-            spread: 60,
-            origin: { y: 0.6 },
-            colors: ['#ff8fb8', '#ffe27a', '#7cc4ff'],
-            scalar: 0.8,
-            disableForReducedMotion: true,
-        })
+        heartBurst({ particleCount: 30, spread: 60, origin: { y: 0.6 }, scalar: 1 })
     }
+
+    if (isPending) return <PageLoader />
 
     return (
         <section className="mx-auto max-w-xl px-4 pb-10 pt-8 text-center sm:pt-12">
@@ -65,13 +65,17 @@ export default function Messages() {
             <motion.button
                 type="button"
                 onClick={draw}
+                disabled={!messages.length}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.93 }}
-                className="mt-8 inline-flex items-center gap-2 rounded-full bg-kw-pink px-8 py-3 text-lg font-bold text-white shadow-lg shadow-pink-300/60"
+                className="mt-8 inline-flex items-center gap-2 rounded-full bg-kw-pink px-8 py-3 text-lg font-bold text-white shadow-lg shadow-pink-300/60 disabled:opacity-50"
             >
                 <FiHeart /> {current ? 'Otro mensaje' : 'Abrir mensaje'}
             </motion.button>
 
+            {messages.length === 0 && (
+                <p className="mt-3 text-sm font-semibold text-kw-ink/60">Todavía no hay mensajes.</p>
+            )}
             {count > 0 && (
                 <p className="mt-3 text-sm font-semibold text-kw-ink/70">Mensajes abiertos: {count}</p>
             )}

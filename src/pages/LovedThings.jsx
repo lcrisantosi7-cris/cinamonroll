@@ -1,4 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import { animate, motion, useInView, useMotionValue, useTransform } from 'framer-motion'
 import Cosmos from '../components/loved/Cosmos'
 import InfinityMark from '../components/loved/InfinityMark'
@@ -7,7 +9,8 @@ import Constellation from '../components/loved/Constellation'
 import ReasonList from '../components/loved/ReasonList'
 import VerseSection from '../components/loved/VerseSection'
 import ButtonLink from '../components/ui/ButtonLink'
-import { LOVED_THINGS } from '../data/lovedThings'
+import PageLoader from '../components/ui/PageLoader'
+import { fetchReasons } from '../lib/content'
 
 function CountUp({ to }) {
     const mv = useMotionValue(0)
@@ -25,7 +28,8 @@ function CountUp({ to }) {
 }
 
 export default function LovedThings() {
-    const reasons = LOVED_THINGS
+    const { data, isPending } = useQuery({ queryKey: ['reasons'], queryFn: fetchReasons })
+    const reasons = useMemo(() => (data ?? []).map((r) => r.body), [data])
 
     return (
         <>
@@ -33,11 +37,7 @@ export default function LovedThings() {
 
             <div className="mx-auto max-w-5xl px-4 pb-10 pt-8 text-white sm:pt-12">
                 <header className="text-center">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 1 }}
-                    >
+                    <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1 }}>
                         <InfinityMark className="mx-auto w-[min(86vw,26rem)] cursor-pointer" />
                     </motion.div>
 
@@ -47,20 +47,35 @@ export default function LovedThings() {
                     <p className="mt-3 text-lg font-semibold text-indigo-100/90">
                         Podría seguir toda la vida, y todavía faltarían.
                     </p>
-                    <p className="mt-5 text-indigo-100/90">
-                        <span className="font-title text-4xl text-amber-200">
-                            <CountUp to={reasons.length} />+
-                        </span>{' '}
-                        razones, y contando
-                    </p>
+                    {reasons.length > 0 && (
+                        <p className="mt-5 text-indigo-100/90">
+                            <span className="font-title text-4xl text-amber-200">
+                                <CountUp to={reasons.length} />+
+                            </span>{' '}
+                            razones, y contando
+                        </p>
+                    )}
                 </header>
 
-                <div className="mt-10">
-                    <Marquee reasons={reasons} />
-                </div>
+                {isPending && <PageLoader />}
 
-                <Constellation reasons={reasons} />
-                <ReasonList reasons={reasons} />
+                {!isPending && reasons.length === 0 && (
+                    <div className="mx-auto mt-12 max-w-md rounded-4xl border border-white/20 bg-white/10 p-8 text-center backdrop-blur-md">
+                        <p className="font-title text-3xl">La lista apenas empieza</p>
+                        <p className="mt-2 text-sm font-semibold text-indigo-100/80">Aquí irán todas las razones.</p>
+                    </div>
+                )}
+
+                {reasons.length > 0 && (
+                    <>
+                        <div className="mt-10">
+                            <Marquee reasons={reasons} />
+                        </div>
+                        <Constellation reasons={reasons} />
+                        <ReasonList reasons={reasons} />
+                    </>
+                )}
+
                 <VerseSection />
 
                 <section className="mt-24 text-center">
