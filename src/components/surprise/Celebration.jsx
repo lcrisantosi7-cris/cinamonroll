@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, useIsPresent } from 'framer-motion'
 
@@ -41,7 +42,15 @@ const Star = ({ size }) => (
 
 export default function Celebration() {
     const isPresent = useIsPresent()
-
+    useEffect(() => {
+        const b = document.body
+        b.dataset.cover = String((Number(b.dataset.cover) || 0) + 1)
+        return () => {
+            const n = (Number(b.dataset.cover) || 1) - 1
+            if (n > 0) b.dataset.cover = String(n)
+            else delete b.dataset.cover
+        }
+    }, [])
     return createPortal(
         <motion.div
             aria-hidden

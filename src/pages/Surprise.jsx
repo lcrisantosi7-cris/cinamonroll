@@ -163,11 +163,15 @@ export default function Surprise() {
 
     if (progress.isPending || settings.isPending) return <PageLoader />
 
+    const requireGames = settings.data?.require_games ?? true
+    const unlocked = !requireGames || force || GAMES.every((g) => progress.completed[g.id])
+
     return (
         <SurpriseFlow
+            key={unlocked ? 'open' : 'locked'}
             completed={progress.completed}
             giftOpened={progress.giftOpened}
-            requireGames={settings.data?.require_games ?? true}
+            requireGames={requireGames}
             force={force}
         />
     )

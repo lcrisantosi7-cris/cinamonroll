@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, useIsPresent, useScroll, useTransform } from 'framer-motion'
 
@@ -64,6 +65,15 @@ function Layer({ children, y }) {
 
 export default function Cosmos() {
     const isPresent = useIsPresent()
+    useEffect(() => {
+        const b = document.body
+        b.dataset.cover = String((Number(b.dataset.cover) || 0) + 1)
+        return () => {
+            const n = (Number(b.dataset.cover) || 1) - 1
+            if (n > 0) b.dataset.cover = String(n)
+            else delete b.dataset.cover
+        }
+    }, [])
     const { scrollY } = useScroll()
     const farY = useTransform(scrollY, [0, 3000], [0, -120])
     const nearY = useTransform(scrollY, [0, 3000], [0, -260])

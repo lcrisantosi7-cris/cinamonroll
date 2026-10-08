@@ -63,7 +63,7 @@ export default function Background() {
     const nearY = useTransform(scrollY, [0, 4000], [0, -320])
 
     return (
-        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div aria-hidden className="sky-bg pointer-events-none fixed inset-0 -z-10 overflow-hidden">
             <motion.div style={{ opacity: dayO }} className="absolute inset-0 bg-linear-to-b from-[#b9e0ff] via-[#e6f4ff] to-[#fff1f6]" />
             <motion.div style={{ opacity: duskO }} className="absolute inset-0 bg-linear-to-b from-[#c9d6ff] via-[#f3e6ff] to-[#ffe6f1]" />
             <motion.div style={{ opacity: meadowO }} className="absolute inset-0 bg-linear-to-b from-[#ffd9ea] via-[#fff3da] to-[#dff6e4]" />

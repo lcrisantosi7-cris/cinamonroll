@@ -104,3 +104,5 @@
     scroll-behavior: auto !important;
   }
 }
+/* Si una página trae su propio fondo (noche, celebración), el cielo se oculta y deja de pintarse */
+body[data-cover] .sky-bg { visibility: hidden; transition: visibility 0s linear 1s; }

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { fetchProgress } from '../lib/content'
 
 export default function useProgress() {
-    const q = useQuery({ queryKey: ['progress'], queryFn: fetchProgress, staleTime: 30_000 })
+    const q = useQuery({ queryKey: ['progress'], queryFn: fetchProgress, staleTime: 30_000, refetchOnMount: 'always' })
     return {
         isPending: q.isPending,
         completed: q.data?.completed ?? {},

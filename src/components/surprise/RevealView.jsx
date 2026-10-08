@@ -56,8 +56,8 @@ function SplitText({ text, delay = 0, className = '' }) {
 function Scene({ text }) {
     return (
         <motion.p
-            initial={{ opacity: 0, y: 40, scale: 0.94, filter: 'blur(8px)' }}
-            whileInView={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+            initial={{ opacity: 0, y: 40, scale: 0.94 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
             viewport={{ once: true, amount: 0.6 }}
             transition={{ duration: 0.9, ease: 'easeOut' }}
             className="mx-auto max-w-xl text-center font-title text-[clamp(1.7rem,6vw,2.6rem)] leading-snug"
@@ -107,8 +107,8 @@ function DevelopingPhoto({ src, caption, rotate = 2 }) {
                         alt={caption || 'Foto de nosotros'}
                         loading="lazy"
                         draggable={false}
-                        initial={{ filter: 'grayscale(1) blur(10px) brightness(1.4)', opacity: 0.6 }}
-                        whileInView={{ filter: 'grayscale(0) blur(0px) brightness(1)', opacity: 1 }}
+                        initial={{ opacity: 0.6 }}
+                        whileInView={{ opacity: 1 }}
                         viewport={{ once: true, amount: 0.5 }}
                         transition={{ duration: 2.2, delay: 0.3 }}
                         className="size-full object-cover"
