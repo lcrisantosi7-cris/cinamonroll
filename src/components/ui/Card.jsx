@@ -30,7 +30,7 @@ export default function Card({ tone = 'pink', tilt = false, className = '', chil
             style={tilt ? { rotateX, rotateY, transformPerspective: 900 } : undefined}
             whileHover={{ y: -4 }}
             transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-            className={`relative rounded-4xl border-2 border-dashed bg-linear-to-br p-5 shadow-lg backdrop-blur-sm sm:p-6 ${TONES[tone]} ${className}`}
+            className={`relative rounded-4xl border-2 border-dashed bg-linear-to-br p-5 shadow-lg sm:p-6 ${TONES[tone]} ${className}`}
             {...props}
         >
             {children}

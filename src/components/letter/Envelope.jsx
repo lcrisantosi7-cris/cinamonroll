@@ -67,13 +67,11 @@ export default function Envelope({ letter, opening, locked, onOpen }) {
                 style={{ rotateX, rotateY, transformPerspective: 1000 }}
             >
                 <motion.div animate={shake}>
-                    <motion.button
+                    <button
                         type="button"
                         onClick={handle}
                         aria-label={locked ? 'Carta bloqueada' : 'Abrir la carta'}
-                        animate={idle ? { y: [0, -8, 0], rotate: [-1, 1, -1] } : { y: 0, rotate: 0 }}
-                        transition={idle ? { duration: 4, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.3 }}
-                        className={`relative block aspect-[4/3] w-full cursor-pointer ${locked ? 'saturate-50' : ''}`}
+                        className={`relative block aspect-[4/3] w-full cursor-pointer ${locked ? 'saturate-50' : ''} ${idle ? 'animate-wobble' : ''}`}
                         style={{ perspective: 1000 }}
                     >
                         {/* fondo */}
@@ -123,14 +121,10 @@ export default function Envelope({ letter, opening, locked, onOpen }) {
                             {HALVES.map((h) => (
                                 <motion.span
                                     key={h.clip}
-                                    className="absolute inset-0"
+                                    className={`absolute inset-0 ${opening ? '' : 'animate-seal'}`}
                                     style={{ clipPath: h.clip }}
-                                    animate={opening ? h.to : { scale: [1, 1.08, 1] }}
-                                    transition={
-                                        opening
-                                            ? { duration: 0.55, ease: 'easeIn' }
-                                            : { duration: 1.8, repeat: Infinity, ease: 'easeInOut' }
-                                    }
+                                    animate={opening ? h.to : undefined}
+                                    transition={{ duration: 0.55, ease: 'easeIn' }}
                                 >
                                     <WaxSeal tone={tone} className="size-full drop-shadow-lg" />
                                 </motion.span>
@@ -153,7 +147,7 @@ export default function Envelope({ letter, opening, locked, onOpen }) {
                             delay={1}
                             className="absolute -bottom-6 -right-5 z-50 w-16 sm:-right-12 sm:w-20"
                         />
-                    </motion.button>
+                    </button>
                 </motion.div>
             </motion.div>
 

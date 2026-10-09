@@ -2,7 +2,8 @@ import { motion } from 'framer-motion'
 import { FiImage } from 'react-icons/fi'
 import { resolveImage } from '../../assets'
 
-export default function Polaroid({ src, caption, className = '' }) {
+export default function Polaroid({ src, caption, className = '', loading = 'lazy' }) {
+
     const url = resolveImage(src)
 
     return (
@@ -15,7 +16,7 @@ export default function Polaroid({ src, caption, className = '' }) {
                     <img
                         src={url}
                         alt={caption || 'Foto de nosotros'}
-                        loading="lazy"
+                        loading={loading}
                         decoding="async"
                         onError={(e) => { e.currentTarget.style.visibility = 'hidden' }}
                         className="size-full object-cover"

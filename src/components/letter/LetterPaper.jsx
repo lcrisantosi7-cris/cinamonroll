@@ -54,14 +54,12 @@ function buildPlan(letter) {
 function Words({ text, start, step, instant }) {
     return text.split(' ').map((w, i) => (
         <Fragment key={i}>
-            <motion.span
-                className="inline-block"
-                initial={instant ? false : { opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: start + i * step, duration: 0.35 }}
+            <span
+                className={`inline-block ${instant ? '' : 'animate-word-in'}`}
+                style={instant ? undefined : { animationDelay: `${start + i * step}s` }}
             >
                 {w}
-            </motion.span>{' '}
+            </span>{' '}
         </Fragment>
     ))
 }
@@ -77,7 +75,7 @@ export default function LetterPaper({ letter, onClose, onNext, hasNext, onRead }
     const [replay, setReplay] = useState(0)
 
     useEffect(() => {
-        heartBurst({ particleCount: 60, spread: 90, origin: { y: 0.3 } })
+        heartBurst({ particleCount: 40, spread: 90, origin: { y: 0.3 } })
     }, [replay])
 
     useEffect(() => {
@@ -134,7 +132,7 @@ export default function LetterPaper({ letter, onClose, onNext, hasNext, onRead }
                     <button
                         type="button"
                         onClick={() => setInstant(true)}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-4 py-1.5 text-sm font-bold shadow-lg backdrop-blur transition active:scale-95"
+                        className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-4 py-1.5 text-sm font-bold shadow-lg transition active:scale-95"
                     >
                         <FiFastForward /> Mostrar todo
                     </button>

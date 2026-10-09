@@ -78,7 +78,7 @@ export default function Background() {
             {STARS.map((s, i) => (
                 <span
                     key={i}
-                    className="absolute animate-twinkle"
+                    className={`absolute animate-twinkle ${i % 2 ? 'max-sm:hidden' : ''}`}
                     style={{ left: `${s.left}%`, top: `${s.top}%`, animationDelay: `${s.delay}s` }}
                 >
                     <Star size={s.size} />
@@ -88,7 +88,7 @@ export default function Background() {
             {HEARTS.map((h, i) => (
                 <span
                     key={i}
-                    className="absolute top-0 animate-rise will-change-transform"
+                    className={`absolute top-0 animate-rise will-change-transform ${i > 3 ? 'max-sm:hidden' : ''}`}
                     style={{ left: `${h.left}%`, animationDuration: `${h.dur}s`, animationDelay: `-${h.delay}s` }}
                 >
                     <Heart size={h.size} />
