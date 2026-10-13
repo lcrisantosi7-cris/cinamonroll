@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { FiHeart, FiPlus, FiSparkles } from 'react-icons/fi'
+import { FiHeart, FiPlus, FiStar } from 'react-icons/fi'
 import { heartBurst, starBurst } from '../../utils/confettiHearts'
 
 const PAGE = 18
@@ -90,22 +90,25 @@ export default function ReasonList({ reasons }) {
                                 type="button"
                                 onClick={(e) => toggle(i, e)}
                                 aria-pressed={on}
-                                className={`group relative flex min-h-28 w-full items-start gap-3 overflow-hidden rounded-3xl border p-4 text-left shadow-lg backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:shadow-xl active:scale-[0.99] sm:min-h-32 sm:p-5 ${on
+                                className={`group relative flex min-h-28 w-full items-start gap-3 overflow-hidden rounded-3xl border p-4 text-left shadow-lg backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:shadow-xl active:scale-[0.99] sm:min-h-32 sm:p-5 ${
+                                    on
                                         ? 'border-pink-200/60 bg-linear-to-br from-pink-300/20 to-rose-300/10 shadow-pink-400/10'
                                         : 'border-white/15 bg-indigo-950/35 hover:border-pink-200/35 hover:bg-white/10'
-                                    }`}
+                                }`}
                             >
                                 <span
                                     aria-hidden="true"
-                                    className={`absolute -right-5 -top-6 size-20 rounded-full blur-2xl transition ${on ? 'bg-pink-300/20' : 'bg-sky-200/5 group-hover:bg-pink-200/10'
-                                        }`}
+                                    className={`absolute -right-5 -top-6 size-20 rounded-full blur-2xl transition ${
+                                        on ? 'bg-pink-300/20' : 'bg-sky-200/5 group-hover:bg-pink-200/10'
+                                    }`}
                                 />
 
                                 <span
-                                    className={`relative grid size-10 shrink-0 place-items-center rounded-2xl font-title text-lg shadow-sm transition sm:size-11 ${on
+                                    className={`relative grid size-10 shrink-0 place-items-center rounded-2xl font-title text-lg shadow-sm transition sm:size-11 ${
+                                        on
                                             ? 'bg-linear-to-br from-pink-200 to-rose-300 text-rose-900'
                                             : 'border border-white/20 bg-white/10 text-amber-100 group-hover:border-pink-200/40'
-                                        }`}
+                                    }`}
                                 >
                                     {String(i + 1).padStart(2, '0')}
                                 </span>
@@ -115,14 +118,16 @@ export default function ReasonList({ reasons }) {
                                 </span>
 
                                 <span
-                                    className={`relative mt-1 grid size-8 shrink-0 place-items-center rounded-full transition ${on
+                                    className={`relative mt-1 grid size-8 shrink-0 place-items-center rounded-full transition ${
+                                        on
                                             ? 'bg-pink-300/20 text-pink-200'
                                             : 'text-white/40 group-hover:text-pink-200'
-                                        }`}
+                                    }`}
                                 >
                                     <FiHeart
-                                        className={`text-lg transition ${on ? 'animate-heartbeat fill-pink-300 text-pink-300' : ''
-                                            }`}
+                                        className={`text-lg transition ${
+                                            on ? 'animate-heartbeat fill-pink-300 text-pink-300' : ''
+                                        }`}
                                     />
                                 </span>
                             </button>
@@ -148,7 +153,7 @@ export default function ReasonList({ reasons }) {
                     </motion.button>
                 ) : (
                     <div className="mx-auto max-w-lg rounded-3xl border border-amber-100/20 bg-white/5 px-5 py-5 backdrop-blur-sm">
-                        <FiSparkles className="mx-auto text-2xl text-amber-200" />
+                        <FiStar className="mx-auto text-2xl text-amber-200" />
                         <p className="mt-2 font-title text-xl text-amber-100 sm:text-2xl">
                             Y aun así, esto no es todo ♡
                         </p>
