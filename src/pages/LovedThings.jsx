@@ -33,20 +33,20 @@ export default function LovedThings() {
         <>
             <Cosmos />
 
-            <div className="mx-auto max-w-5xl px-4 pb-10 pt-8 text-white sm:pt-12">
+            <div className="mx-auto w-full max-w-5xl px-3 pb-8 pt-5 text-white sm:px-4 sm:pb-10 sm:pt-12">
                 <header className="text-center">
                     <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1 }}>
                         <InfinityMark className="mx-auto w-[min(86vw,26rem)] cursor-pointer" />
                     </motion.div>
 
-                    <h1 className="mt-2 bg-linear-to-r from-pink-200 via-amber-100 to-sky-200 bg-clip-text font-title text-[clamp(2.4rem,9vw,4.6rem)] leading-none text-transparent">
+                    <h1 className="mx-auto mt-2 max-w-[16ch] text-balance bg-linear-to-r from-pink-200 via-amber-100 to-sky-200 bg-clip-text font-title text-[clamp(2rem,8.5vw,4.6rem)] leading-[1.05] text-transparent">
                         Cosas que amo de ti
                     </h1>
-                    <p className="mt-3 text-lg font-semibold text-indigo-100/90">
+                    <p className="mx-auto mt-3 max-w-[32rem] text-base font-semibold leading-relaxed text-indigo-100/90 sm:text-lg">
                         Podría seguir toda la vida, y todavía faltarían.
                     </p>
                     {reasons.length > 0 && (
-                        <p className="mt-5 text-indigo-100/90">
+                        <p className="mt-4 text-sm text-indigo-100/90 sm:mt-5 sm:text-base">
                             <span className="font-title text-4xl text-amber-200">
                                 <CountUp to={reasons.length} />+
                             </span>{' '}
@@ -66,7 +66,7 @@ export default function LovedThings() {
 
                 {reasons.length > 0 && (
                     <>
-                        <div className="mt-10">
+                        <div className="mt-7 sm:mt-10">
                             <Marquee reasons={reasons} />
                         </div>
                         <Constellation reasons={reasons} />
@@ -76,10 +76,10 @@ export default function LovedThings() {
 
                 <VerseSection />
 
-                <section className="mt-24 text-center">
-                    <InfinityMark className="mx-auto w-48" />
-                    <p className="mt-4 font-title text-3xl sm:text-4xl">Y todavía faltan muchas más</p>
-                    <p className="mt-2 text-indigo-100/80">Las iré descubriendo contigo, una por una.</p>
+                <section className="mt-16 px-1 text-center sm:mt-24">
+                    <InfinityMark className="mx-auto w-36 max-w-[55vw] sm:w-48" />
+                    <p className="mt-4 text-balance font-title text-2xl sm:text-4xl">Y todavía faltan muchas más</p>
+                    <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-indigo-100/80 sm:text-base">Las iré descubriendo contigo, una por una.</p>
                     <ButtonLink to="/" className="mt-6">
                         Volver al inicio
                     </ButtonLink>
