@@ -63,8 +63,8 @@ function Ctrl({ onClick, label, children, className = '' }) {
 export default function Constellation({ reasons }) {
     const wide = useMedia('(min-width: 768px)')
     const w = wide ? 1000 : 400
-    const h = wide ? 440 : 720
-    const stretch = wide ? 1.3 : 1.7
+    const h = wide ? 440 : 560
+    const stretch = wide ? 1.3 : 1.5
 
     const curve = useMemo(
         () => lemniscate({ width: w, height: h, vertical: !wide, stretch }),
@@ -123,11 +123,11 @@ export default function Constellation({ reasons }) {
     const all = seen.size === reasons.length
 
     return (
-        <section className="mt-16 text-center">
-            <h2 className="font-title text-3xl sm:text-4xl">Cada estrella es una razón</h2>
-            <p className="mt-1 text-indigo-100/80">Toca una estrella del infinito</p>
+        <section className="mt-12 min-w-0 text-center sm:mt-16">
+            <h2 className="text-balance font-title text-2xl sm:text-4xl">Cada estrella es una razón</h2>
+            <p className="mt-2 px-2 text-sm leading-relaxed text-indigo-100/80 sm:text-base">Toca una estrella del infinito</p>
 
-            <svg viewBox={`0 0 ${w} ${h}`} className="mx-auto mt-4 w-full max-w-sm md:max-w-4xl">
+            <svg viewBox={`0 0 ${w} ${h}`} className="mx-auto mt-3 block h-auto w-full max-w-[min(100%,25rem)] touch-pan-y md:mt-4 md:max-w-4xl">
                 <defs>
                     <linearGradient id="conGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2={w} y2={h}>
                         <stop offset="0" stopColor="#ffc2da" />
@@ -169,8 +169,8 @@ export default function Constellation({ reasons }) {
                 ))}
             </svg>
 
-            <div className="mx-auto mt-4 max-w-xl rounded-3xl border border-white/20 bg-white/10 p-5 backdrop-blur-md">
-                <div className="grid min-h-28 place-items-center">
+            <div className="mx-auto mt-3 w-full max-w-xl rounded-3xl border border-white/20 bg-white/10 p-4 backdrop-blur-md sm:mt-4 sm:p-5">
+                <div className="grid min-h-24 min-w-0 place-items-center sm:min-h-28">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={sel ?? 'none'}
@@ -180,13 +180,13 @@ export default function Constellation({ reasons }) {
                             transition={{ duration: 0.25 }}
                         >
                             {sel === null ? (
-                                <p className="font-title text-2xl text-indigo-100/90">Elige una estrella para descubrirla</p>
+                                <p className="max-w-full text-balance font-title text-xl text-indigo-100/90 sm:text-2xl">Elige una estrella para descubrirla</p>
                             ) : (
                                 <>
                                     <p className="text-xs font-extrabold uppercase tracking-[0.3em] text-amber-200">
                                         Razón {sel + 1}
                                     </p>
-                                    <p className="mt-2 font-title text-[clamp(1.6rem,5vw,2.2rem)] leading-snug">
+                                    <p className="mt-2 break-words font-title text-[clamp(1.35rem,5vw,2.2rem)] leading-snug [overflow-wrap:anywhere]">
                                         {reasons[sel]}
                                     </p>
                                 </>
@@ -195,7 +195,7 @@ export default function Constellation({ reasons }) {
                     </AnimatePresence>
                 </div>
 
-                <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
                     <Ctrl onClick={() => go(-1)} label="Anterior" className="px-3">
                         <FiChevronLeft />
                     </Ctrl>
@@ -210,7 +210,7 @@ export default function Constellation({ reasons }) {
                     </Ctrl>
                 </div>
 
-                <p className="mt-4 text-sm font-bold text-indigo-100/80">
+                <p className="mt-4 text-xs font-bold text-indigo-100/80 sm:text-sm">
                     Descubiertas {seen.size} de {reasons.length}
                     {all && ' · y aun así hay más'}
                 </p>
