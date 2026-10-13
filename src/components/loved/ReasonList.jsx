@@ -46,13 +46,13 @@ export default function ReasonList({ reasons }) {
     }
 
     return (
-        <section className="mt-20">
+        <section className="mt-14 min-w-0 sm:mt-20">
             <header className="mx-auto max-w-2xl text-center">
                 <span className="mx-auto grid size-12 place-items-center rounded-2xl border border-pink-200/25 bg-pink-200/10 text-pink-200 shadow-lg shadow-pink-500/10">
                     <FiHeart className="text-xl" />
                 </span>
 
-                <h2 className="mt-4 bg-linear-to-r from-pink-200 via-amber-100 to-pink-200 bg-clip-text font-title text-3xl text-transparent sm:text-4xl">
+                <h2 className="mt-4 text-balance bg-linear-to-r from-pink-200 via-amber-100 to-pink-200 bg-clip-text font-title text-2xl text-transparent sm:text-4xl">
                     Todas las razones
                 </h2>
 
@@ -73,7 +73,7 @@ export default function ReasonList({ reasons }) {
                 )}
             </header>
 
-            <ul className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+            <ul className="mt-6 grid min-w-0 grid-cols-1 gap-3 sm:mt-8 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
                 {reasons.slice(0, shown).map((text, i) => {
                     const on = !!loved[i]
 
@@ -110,7 +110,7 @@ export default function ReasonList({ reasons }) {
                                     {String(i + 1).padStart(2, '0')}
                                 </span>
 
-                                <span className="relative min-w-0 flex-1 break-words pt-1 font-title text-lg leading-snug text-white sm:text-xl">
+                                <span className="relative min-w-0 flex-1 break-words pt-1 font-title text-base leading-snug text-white [overflow-wrap:anywhere] sm:text-xl">
                                     {text}
                                 </span>
 
@@ -131,7 +131,7 @@ export default function ReasonList({ reasons }) {
                 })}
             </ul>
 
-            <div className="mt-9 text-center">
+            <div className="mt-7 px-1 text-center sm:mt-9">
                 {remaining > 0 ? (
                     <motion.button
                         type="button"
