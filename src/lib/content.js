@@ -147,3 +147,89 @@ export async function redeemCoupon(id) {
     await queryClient.invalidateQueries({ queryKey: ['redemptions'] })
     if (error) throw error
 }
+
+// ---------- Administración de cartas ----------
+
+export async function fetchLettersAdmin() {
+    const { data, error } = await supabase
+        .from('letters')
+        .select(
+            'id, label, title, tone, letter_date, unlock_at, position, is_active'
+        )
+        .order('position')
+        .order('created_at')
+
+    if (error) throw error
+    return data ?? []
+}
+
+export async function saveLetter({ id, meta, body, createdBy }) {
+    const letterData = {
+        label: meta.label.trim(),
+        title: meta.title.trim(),
+        tone: meta.tone,
+        letter_date: meta.letter_date || null,
+        unlock_at: meta.unlock_at
+            ? new Date(meta.unlock_at).toISOString()
+            : null,
+        position: Number(meta.position) || 1,
+        is_active: meta.is_active,
+    }
+
+    let letterId = id
+
+    if (letterId) {
+        const { error } = await supabase
+            .from('letters')
+            .update(letterData)
+            .eq('id', letterId)
+
+        if (error) throw error
+    } else {
+        const { data, error } = await supabase
+            .from('letters')
+            .insert({
+                ...letterData,
+                created_by: createdBy,
+            })
+            .select('id')
+            .single()
+
+        if (error) throw error
+        letterId = data.id
+    }
+
+    const bodyData = {
+        letter_id: letterId,
+        greeting: body.greeting.trim(),
+        paragraphs: body.paragraphs
+            .split('\n')
+            .map((paragraph) => paragraph.trim())
+            .filter(Boolean),
+        closing: body.closing.trim(),
+        signature: body.signature.trim(),
+        ps: body.ps.trim() || null,
+    }
+
+    const { error: bodyError } = await supabase
+        .from('letter_bodies')
+        .upsert(bodyData, { onConflict: 'letter_id' })
+
+    if (bodyError) throw bodyError
+
+    await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['letters'] }),
+        queryClient.invalidateQueries({ queryKey: ['letters-admin'] }),
+    ])
+
+    return letterId
+}
+
+export const fetchLetterBodyAdmin = async (id) =>
+    must(
+        await supabase
+            .from('letter_bodies')
+            .select('greeting, paragraphs, closing, signature, ps')
+            .eq('letter_id', id)
+            .maybeSingle()
+    )

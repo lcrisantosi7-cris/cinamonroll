@@ -8,7 +8,7 @@ export const GAMES = [
         blurb: 'Ayuda a Cinnamoroll a llegar a su nube.',
         text: 'Ayuda a Cinnamoroll a esquivar nubes oscuras y juntar estrellas hasta llegar a su nube.',
         levels: '3 niveles',
-        img: '/images/characters/cinnamoroll.png',
+        img: '/images/icons/juego-cinnamoroll.png',
         reward: 'Cinnamoroll llegó a su nube, igual que yo llegué a ti. Eres mi lugar favorito.',
     },
     {
@@ -20,8 +20,8 @@ export const GAMES = [
         blurb: 'Junta fresitas y esquiva lo que no es bueno.',
         text: 'Junta las fresitas de cada nivel, pero cuidado con lo que no es bueno.',
         levels: '3 niveles',
-        img: '/images/characters/cinnamoroll.png',
-        reward: 'Dulce como una fresita: así de dulce eres tú, mi papa.',
+        img: '/images/icons/juego-fresitas.png',
+        reward: 'Dulce como una fresita: así de dulce eres tú, mi fresita<3.',
     },
     {
         id: 'pompompurin',
@@ -32,7 +32,7 @@ export const GAMES = [
         blurb: 'Encuentra los flanes de Pompompurin.',
         text: 'Encuentra los flanes escondidos en 3 escenas antes de que se acabe el tiempo.',
         levels: '3 escenas',
-        img: '/images/characters/pompompurin.png',
+        img: '/images/icons/juego-flanes.png',
         reward: 'Encontraste todos los flanes, pero yo ya encontré mi tesoro más grande: tú.',
     },
 ]

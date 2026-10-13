@@ -22,7 +22,6 @@ export const NAV = [
 ]
 
 const PLAYLIST = [
-    { title: 'Eres mi persona favorita', file: 'eres-mi-persona-favorita' },
     { title: 'silly cat', file: 'silly-cat' },
     { title: 'Cute Circus', file: 'Cute-Circus' },
     { title: 'Mochi-Cat', file: 'Mochi-Cat' },
@@ -49,4 +48,4 @@ export const PHRASES = {
         `Siempre contigo, mi ${her}`,
     ],
 }
-export const CONTACT = { whatsapp: '943759634' }
+export const CONTACT = { whatsapp: '' }
