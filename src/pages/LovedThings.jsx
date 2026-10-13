@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
 import { animate, motion, useInView, useMotionValue, useTransform } from 'framer-motion'
 import Cosmos from '../components/loved/Cosmos'
 import InfinityMark from '../components/loved/InfinityMark'
@@ -11,7 +10,6 @@ import VerseSection from '../components/loved/VerseSection'
 import ButtonLink from '../components/ui/ButtonLink'
 import PageLoader from '../components/ui/PageLoader'
 import { fetchReasons } from '../lib/content'
-
 function CountUp({ to }) {
     const mv = useMotionValue(0)
     const rounded = useTransform(mv, (v) => Math.round(v))
