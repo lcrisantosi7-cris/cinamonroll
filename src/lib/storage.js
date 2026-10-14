@@ -1,13 +1,14 @@
 import { supabase } from './supabase'
 
 export const BUCKET = 'media'
-const TTL_SECONDS = 60 * 60 * 12
-const MARGIN_MS = 10 * 60 * 1000
-const LS_KEY = 'signed-urls-v1'
+const TTL_SECONDS = 60 * 60
+const MARGIN_MS = 5 * 60 * 1000
+const SESSION_KEY = 'signed-urls-v2'
+const LEGACY_KEY = 'signed-urls-v1'
 
 const load = () => {
     try {
-        const raw = JSON.parse(localStorage.getItem(LS_KEY) ?? '{}')
+        const raw = JSON.parse(sessionStorage.getItem(SESSION_KEY) ?? '{}')
         const now = Date.now()
         return new Map(Object.entries(raw).filter(([, v]) => v?.exp > now + MARGIN_MS))
     } catch {
@@ -16,12 +17,18 @@ const load = () => {
 }
 const cache = load()
 
+try {
+    localStorage.removeItem(LEGACY_KEY)
+} catch {
+    /* el navegador puede bloquear el almacenamiento */
+}
+
 let saveTimer = null
 const save = () => {
     clearTimeout(saveTimer)
     saveTimer = setTimeout(() => {
         try {
-            localStorage.setItem(LS_KEY, JSON.stringify(Object.fromEntries(cache)))
+            sessionStorage.setItem(SESSION_KEY, JSON.stringify(Object.fromEntries(cache)))
         } catch {
             /* sin almacenamiento o lleno: se ignora */
         }
@@ -45,9 +52,12 @@ export async function signPaths(paths) {
 }
 
 export const clearSigned = () => {
+    clearTimeout(saveTimer)
     cache.clear()
     try {
-        localStorage.removeItem(LS_KEY)
+        sessionStorage.removeItem(SESSION_KEY)
+        // Borra la caché antigua que guardaba URLs firmadas en localStorage.
+        localStorage.removeItem(LEGACY_KEY)
     } catch {
         /* nada que borrar */
     }
