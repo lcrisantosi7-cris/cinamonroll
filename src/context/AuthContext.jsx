@@ -63,7 +63,7 @@ export function AuthProvider({ children }) {
             .select('id, username, display_name')
             .eq('id', uid)
             .maybeSingle()
-            .then(({ data, error }) => {
+            .then(async ({ data, error }) => {
                 if (!alive) return
                 // Error de red: no cerramos la sesión, solo dejamos de cargar
                 if (error) {
