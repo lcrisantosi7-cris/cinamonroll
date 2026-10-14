@@ -1,12 +1,20 @@
 import { supabase } from './supabase'
 import { BUCKET } from './storage'
-import { extOf, MAX_IMAGE_BYTES, MAX_VIDEO_BYTES, processImage, processVideo } from './imageTools'
+import { extOf, MAX_IMAGE_BYTES, MAX_VIDEO_BYTES, processVideo } from './imageTools'
 
 export const MAX_FILES = 12
 const VIDEO_EXT = { 'video/mp4': 'mp4', 'video/webm': 'webm', 'video/quicktime': 'mov' }
+const IMAGE_EXT = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+    'image/avif': 'avif',
+}
+const STAGING_BUCKET = 'image-staging'
 
 export function validateFile(file) {
     if (file.type.startsWith('image/')) {
+        if (!IMAGE_EXT[file.type]) return `"${file.name}" tiene un formato no compatible. Usa JPG, PNG, WebP o AVIF.`
         return file.size <= MAX_IMAGE_BYTES ? null : `"${file.name}" pesa demasiado (máximo 40 MB).`
     }
     if (VIDEO_EXT[file.type]) {
@@ -22,8 +30,8 @@ export function friendlyError(e) {
     if (m.includes('exceeded') || m.includes('too large') || m.includes('payload')) {
         return 'Un archivo supera el tamaño máximo permitido (50 MB).'
     }
-    if (m.includes('mime')) return 'Uno de los archivos tiene un formato no permitido.'
-    if (m.includes('row-level security') || m.includes('policy')) {
+    if (m.includes('mime') || m.includes('format')) return 'Uno de los archivos tiene un formato no permitido.'
+    if (m.includes('row-level security') || m.includes('policy') || m.includes('permission')) {
         return 'No tienes permiso para hacer esto. Cierra sesión y vuelve a entrar.'
     }
     if (m.includes('fetch') || m.includes('network')) {
@@ -40,41 +48,68 @@ async function upload(path, blob, contentType) {
     return path
 }
 
-// Prepara y sube los archivos; devuelve las filas listas para guardar en "media"
+async function uploadImageThroughServer(file, { userId, memoryId, mediaId }) {
+    const extension = IMAGE_EXT[file.type]
+    if (!extension) throw new Error('Formato no admitido. Usa JPG, PNG, WebP o AVIF.')
+    const sourcePath = `${userId}/${memoryId}/${mediaId}.${extension}`
+
+    const { error: stageError } = await supabase.storage
+        .from(STAGING_BUCKET)
+        .upload(sourcePath, file, { contentType: file.type, cacheControl: '60', upsert: false })
+    if (stageError) throw stageError
+
+    try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        if (sessionError) throw sessionError
+        if (!session?.access_token) throw new Error('Tu sesión expiró. Vuelve a iniciar sesión.')
+
+        const response = await fetch('/api/process-image', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ sourcePath, memoryId, mediaId }),
+        })
+        const result = await response.json().catch(() => ({}))
+        if (!response.ok) throw new Error(result.error || 'El servidor no pudo procesar la imagen.')
+        return result
+    } catch (error) {
+        // La función también intenta borrar el original temporal; esta es una segunda limpieza.
+        await supabase.storage.from(STAGING_BUCKET).remove([sourcePath]).catch(() => {})
+        throw error
+    }
+}
+
+// Prepara y sube los archivos; las imágenes finales se recodifican obligatoriamente en Vercel.
 async function uploadFiles({ userId, memoryId, files, startPosition = 0, onProgress }) {
     const total = files.length
+    const rows = []
 
-    const prepared = []
     for (let i = 0; i < total; i++) {
         onProgress?.({ phase: 'prepare', done: i, total })
-        const f = files[i]
-        prepared.push(f.type.startsWith('video/') ? await processVideo(f) : await processImage(f))
-    }
-
-    const rows = []
-    for (let i = 0; i < total; i++) {
-        onProgress?.({ phase: 'upload', done: i, total })
-        const p = prepared[i]
+        const file = files[i]
         const mediaId = crypto.randomUUID()
         const base = `${userId}/${memoryId}/${mediaId}`
         const position = startPosition + i
 
-        if (p.kind === 'image') {
-            const ext = extOf(p.full)
+        if (file.type.startsWith('image/')) {
+            const processed = await uploadImageThroughServer(file, { userId, memoryId, mediaId })
             rows.push({
                 memory_id: memoryId,
                 kind: 'image',
-                path_thumb: await upload(`${base}-thumb.${ext}`, p.thumb, p.thumb.type),
-                path_medium: await upload(`${base}-medium.${ext}`, p.medium, p.medium.type),
-                path_full: await upload(`${base}-full.${ext}`, p.full, p.full.type),
-                width: p.width,
-                height: p.height,
-                bytes: p.full.size,
-                blur: p.blur,
+                path_thumb: processed.path_thumb,
+                path_medium: processed.path_medium,
+                path_full: processed.path_full,
+                width: processed.width,
+                height: processed.height,
+                bytes: processed.bytes,
+                blur: null,
                 position,
             })
         } else {
-            const file = files[i]
+            const p = await processVideo(file)
+            onProgress?.({ phase: 'upload', done: i, total })
             rows.push({
                 memory_id: memoryId,
                 kind: 'video',
@@ -88,6 +123,7 @@ async function uploadFiles({ userId, memoryId, files, startPosition = 0, onProgr
                 position,
             })
         }
+        onProgress?.({ phase: 'upload', done: i + 1, total })
     }
     return rows
 }
