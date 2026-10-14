@@ -86,8 +86,7 @@ export default async function handler(req, res) {
         const base = `${user.id}/${memoryId}/${mediaId}`
         const uploadedPaths = []
         try {
-            const input = sharp(source, { limitInputPixels: MAX_PIXELS, failOn: 'error' })
-            const metadata = await input.metadata()
+            const metadata = await sharp(source, { limitInputPixels: MAX_PIXELS, failOn: 'error' }).metadata()
             if (!metadata.width || !metadata.height || metadata.width * metadata.height > MAX_PIXELS) {
                 return reply(res, 400, { error: 'La imagen tiene dimensiones demasiado grandes.' })
             }
@@ -108,6 +107,11 @@ export default async function handler(req, res) {
                     .toBuffer({ resolveWithObject: true })
                 return { key, buffer: result.data, width: result.info.width, height: result.info.height }
             }))
+            const blurBuffer = await sharp(source, { limitInputPixels: MAX_PIXELS, failOn: 'error' })
+                .rotate()
+                .resize({ width: 16, height: 16, fit: 'inside', withoutEnlargement: true })
+                .jpeg({ quality: 50 })
+                .toBuffer()
 
             const paths = {}
             for (const output of outputs) {
@@ -130,7 +134,8 @@ export default async function handler(req, res) {
                 path_full: paths.full,
                 width: full.width,
                 height: full.height,
-                bytes: outputs.find((item) => item.key === 'full').buffer.length,
+                bytes: full.buffer.length,
+                blur: `data:image/jpeg;base64,${blurBuffer.toString('base64')}`,
                 contentType: 'image/webp',
             })
         } catch (error) {
