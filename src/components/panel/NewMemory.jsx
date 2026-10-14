@@ -15,6 +15,7 @@ const input =
 
 export default function NewMemory() {
     const { profile } = useAuth()
+    const photoOnly = profile?.role === 'photo_uploader'
     const qc = useQueryClient()
     const [items, setItems] = useState([])
     const [title, setTitle] = useState('')
@@ -38,6 +39,10 @@ export default function NewMemory() {
         setOk(false)
         const next = [...items]
         for (const file of Array.from(list)) {
+            if (photoOnly && !file.type.startsWith('image/')) {
+                setError('Esta cuenta solo puede subir fotografías.')
+                continue
+            }
             const problem = validateFile(file)
             if (problem) {
                 setError(problem)
@@ -70,7 +75,7 @@ export default function NewMemory() {
     }
 
     const busy = !!progress
-    const needsFiles = inGallery && items.length === 0
+    const needsFiles = (photoOnly || inGallery) && items.length === 0
     const canSend = !busy && title.trim() && (inGallery || inTimeline || inSurprise) && !needsFiles
 
     const submit = async (e) => {
@@ -85,10 +90,10 @@ export default function NewMemory() {
                 title: title.trim(),
                 description: description.trim(),
                 date,
-                inGallery,
-                inTimeline,
-                inSurprise,
-                icon,
+                inGallery: photoOnly ? true : inGallery,
+                inTimeline: photoOnly ? false : inTimeline,
+                inSurprise: photoOnly ? false : inSurprise,
+                icon: photoOnly ? 'generico' : icon,
                 files: items.map((i) => i.file),
                 onProgress: setProgress,
             })
@@ -131,8 +136,8 @@ export default function NewMemory() {
             onSubmit={submit}
             className="rounded-4xl border-2 border-dashed border-kw-pink/70 bg-white/80 p-5 shadow-lg backdrop-blur sm:p-6"
         >
-            <h2 className="font-title text-3xl">Nuevo recuerdo</h2>
-            <p className="text-sm font-semibold text-kw-ink/70">Fotos y videos de los dos juntos</p>
+            <h2 className="font-title text-3xl">{photoOnly ? 'Subir fotografías' : 'Nuevo recuerdo'}</h2>
+            <p className="text-sm font-semibold text-kw-ink/70">{photoOnly ? 'Puedes añadir fotografías a la galería.' : 'Fotos y videos de los dos juntos'}</p>
 
             <label
                 onDragOver={(e) => {
@@ -151,7 +156,7 @@ export default function NewMemory() {
                 <input
                     type="file"
                     multiple
-                    accept="image/*,video/mp4,video/webm,video/quicktime"
+                    accept={photoOnly ? "image/*" : "image/*,video/mp4,video/webm,video/quicktime"}
                     onChange={(e) => {
                         addFiles(e.target.files)
                         e.target.value = ''
@@ -161,9 +166,9 @@ export default function NewMemory() {
                 <span className="grid size-12 place-items-center rounded-full bg-kw-pink text-2xl text-white shadow-lg">
                     <FiPlus />
                 </span>
-                <span className="mt-2 font-bold">Elegir fotos o videos</span>
+                <span className="mt-2 font-bold">{photoOnly ? 'Elegir fotografías' : 'Elegir fotos o videos'}</span>
                 <span className="text-xs font-semibold text-kw-ink/60">
-                    Fotos hasta 40 MB. Videos hasta 50 MB. Máximo {MAX_FILES}.
+                    {photoOnly ? 'Fotos hasta 40 MB. ' : 'Fotos hasta 40 MB. Videos hasta 50 MB. '}Máximo {MAX_FILES}.
                 </span>
             </label>
 
@@ -249,13 +254,13 @@ export default function NewMemory() {
                     )}
                 </div>
 
-                <Switch
+                {!photoOnly && <Switch
                     checked={inGallery}
                     onChange={setInGallery}
                     label="Mostrar en la galería"
                     hint="Aparece como foto en la galería"
-                />
-                <Switch
+                />}
+                {!photoOnly && <Switch
                     checked={inTimeline}
                     onChange={setInTimeline}
                     label="Mostrar en la línea de tiempo"
@@ -266,21 +271,21 @@ export default function NewMemory() {
                     onChange={setInSurprise}
                     label="Para la sorpresa final"
                     hint="Solo se ve cuando se abre el regalo"
-                />
+                />}
 
-                {inTimeline && (
+                {!photoOnly && inTimeline && (
                     <div>
                         <p className="mb-2 text-sm font-bold">Ícono en la línea de tiempo</p>
                         <IconPicker value={icon} onChange={setIcon} />
                     </div>
                 )}
 
-                {!inGallery && !inTimeline && !inSurprise && (
+                {!photoOnly && !inGallery && !inTimeline && !inSurprise && (
                     <p className="text-sm font-bold text-rose-500">Elige al menos un lugar donde mostrarlo.</p>
                 )}
                 {needsFiles && (
                     <p className="text-sm font-bold text-rose-500">
-                        Para la galería necesitas al menos una foto o un video.
+                        {photoOnly ? 'Selecciona al menos una fotografía.' : 'Para la galería necesitas al menos una foto o un video.'}
                     </p>
                 )}
             </div>
