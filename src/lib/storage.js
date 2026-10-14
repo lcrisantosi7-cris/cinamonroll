@@ -17,6 +17,12 @@ const load = () => {
 }
 const cache = load()
 
+try {
+    localStorage.removeItem(LEGACY_KEY)
+} catch {
+    /* el navegador puede bloquear el almacenamiento */
+}
+
 let saveTimer = null
 const save = () => {
     clearTimeout(saveTimer)
