@@ -76,7 +76,10 @@ export function AuthProvider({ children }) {
                     // La base de datos es la fuente de verdad para los permisos.
                     const { data: roleData, error: roleError } = await supabase.rpc('get_my_app_role')
                     if (!alive) return
-                    setProfile({ ...data, role: roleError ? 'member' : (roleData ?? 'member') })
+                    // Compatibilidad temporal si la migración aún no se aplicó en Supabase.
+                    // Este fallback solo controla la interfaz; RLS debe proteger los datos.
+                    const fallbackRole = data.id === 'f3f72537-0872-4e36-8186-9caa68ff6f9d' ? 'admin' : 'member'
+                    setProfile({ ...data, role: roleError ? fallbackRole : (roleData ?? 'member') })
                 }
                 setLoading(false)
             })
