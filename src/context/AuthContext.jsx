@@ -72,7 +72,12 @@ export function AuthProvider({ children }) {
                 }
                 // Una cuenta sin perfil no es miembro: se cierra la sesión
                 if (!data) supabase.auth.signOut()
-                else setProfile(data)
+                else {
+                    // La base de datos es la fuente de verdad para los permisos.
+                    const { data: roleData, error: roleError } = await supabase.rpc('get_my_app_role')
+                    if (!alive) return
+                    setProfile({ ...data, role: roleError ? 'member' : (roleData ?? 'member') })
+                }
                 setLoading(false)
             })
             .catch(() => {
@@ -106,6 +111,9 @@ export function AuthProvider({ children }) {
     const confirmEdit = useCallback(
         async (password) => {
             if (!session?.user?.email) return { ok: false, message: 'No hay sesión.' }
+            if (!['admin', 'photo_uploader'].includes(profile?.role)) {
+                return { ok: false, message: 'Tu cuenta no tiene permisos para acceder al panel.' }
+            }
             const { error } = await supabase.auth.signInWithPassword({
                 email: session.user.email,
                 password,
@@ -115,7 +123,7 @@ export function AuthProvider({ children }) {
             setCanEdit(true)
             return { ok: true }
         },
-        [session]
+        [session, profile]
     )
 
     const lockEdit = useCallback(() => {
