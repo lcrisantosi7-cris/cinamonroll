@@ -104,7 +104,7 @@ async function uploadFiles({ userId, memoryId, files, startPosition = 0, onProgr
                 width: processed.width,
                 height: processed.height,
                 bytes: processed.bytes,
-                blur: null,
+                blur: processed.blur,
                 position,
             })
         } else {
