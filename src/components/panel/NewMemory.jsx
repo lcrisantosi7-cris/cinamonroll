@@ -254,24 +254,28 @@ export default function NewMemory() {
                     )}
                 </div>
 
-                {!photoOnly && <Switch
-                    checked={inGallery}
-                    onChange={setInGallery}
-                    label="Mostrar en la galería"
-                    hint="Aparece como foto en la galería"
-                />}
-                {!photoOnly && <Switch
-                    checked={inTimeline}
-                    onChange={setInTimeline}
-                    label="Mostrar en la línea de tiempo"
-                    hint="Aparece como un capítulo de nuestra historia"
-                />
-                <Switch
-                    checked={inSurprise}
-                    onChange={setInSurprise}
-                    label="Para la sorpresa final"
-                    hint="Solo se ve cuando se abre el regalo"
-                />}
+                {!photoOnly && (
+                    <>
+                        <Switch
+                            checked={inGallery}
+                            onChange={setInGallery}
+                            label="Mostrar en la galería"
+                            hint="Aparece como foto en la galería"
+                        />
+                        <Switch
+                            checked={inTimeline}
+                            onChange={setInTimeline}
+                            label="Mostrar en la línea de tiempo"
+                            hint="Aparece como un capítulo de nuestra historia"
+                        />
+                        <Switch
+                            checked={inSurprise}
+                            onChange={setInSurprise}
+                            label="Para la sorpresa final"
+                            hint="Solo se ve cuando se abre el regalo"
+                        />
+                    </>
+                )}
 
                 {!photoOnly && inTimeline && (
                     <div>
