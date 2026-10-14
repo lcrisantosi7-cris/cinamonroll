@@ -65,45 +65,54 @@ on conflict (user_id) do update set role = 'admin';
 -- Admin-only writes for application content. Existing SELECT policies remain in place.
 drop policy if exists "audio_tracks: crear" on public.audio_tracks;
 drop policy if exists "audio_tracks: editar lo propio" on public.audio_tracks;
+drop policy if exists "audio_tracks: admin full access" on public.audio_tracks;
 create policy "audio_tracks: admin full access" on public.audio_tracks
 for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 drop policy if exists "coupons: crear" on public.coupons;
 drop policy if exists "coupons: editar lo propio" on public.coupons;
+drop policy if exists "coupons: admin full access" on public.coupons;
 create policy "coupons: admin full access" on public.coupons
 for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 drop policy if exists "letters: crear" on public.letters;
 drop policy if exists "letters: editar lo propio" on public.letters;
+drop policy if exists "letters: admin full access" on public.letters;
 create policy "letters: admin full access" on public.letters
 for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 drop policy if exists "cuerpos: crear" on public.letter_bodies;
 drop policy if exists "cuerpos: editar" on public.letter_bodies;
+drop policy if exists "letter_bodies: admin full access" on public.letter_bodies;
 create policy "letter_bodies: admin full access" on public.letter_bodies
 for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 drop policy if exists "messages: crear" on public.messages;
 drop policy if exists "messages: editar lo propio" on public.messages;
+drop policy if exists "messages: admin full access" on public.messages;
 create policy "messages: admin full access" on public.messages
 for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 drop policy if exists "reasons: crear" on public.reasons;
 drop policy if exists "reasons: editar lo propio" on public.reasons;
+drop policy if exists "reasons: admin full access" on public.reasons;
 create policy "reasons: admin full access" on public.reasons
 for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 drop policy if exists "contenido: crear" on public.site_content;
 drop policy if exists "contenido: editar lo propio" on public.site_content;
+drop policy if exists "site_content: admin full access" on public.site_content;
 create policy "site_content: admin full access" on public.site_content
 for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 -- Memories: Luis can manage all records; photo_uploader can only create non-surprise memories.
 drop policy if exists "memories: crear" on public.memories;
 drop policy if exists "memories: editar lo propio" on public.memories;
+drop policy if exists "memories: admin full access" on public.memories;
 create policy "memories: admin full access" on public.memories
 for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
+drop policy if exists "memories: photo uploader insert" on public.memories;
 create policy "memories: photo uploader insert" on public.memories
 for insert to authenticated
 with check (
@@ -116,9 +125,11 @@ with check (
 -- Media rows: photo_uploader can add only processed image variants under their own memory.
 drop policy if exists "media: crear" on public.media;
 drop policy if exists "media: editar lo propio" on public.media;
+drop policy if exists "media: admin full access" on public.media;
 create policy "media: admin full access" on public.media
 for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
+drop policy if exists "media: photo uploader insert images only" on public.media;
 create policy "media: photo uploader insert images only" on public.media
 for insert to authenticated
 with check (
@@ -144,6 +155,7 @@ with check (
 );
 
 -- Profile management is administrator-only; members retain the existing SELECT policy.
+drop policy if exists "profiles: admin full access" on public.profiles;
 create policy "profiles: admin full access" on public.profiles
 for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
@@ -151,11 +163,13 @@ for all to authenticated using (public.is_admin()) with check (public.is_admin()
 -- into their own UID folder; there is intentionally no uploader UPDATE/DELETE policy.
 drop policy if exists "media bucket: miembros suben a su carpeta" on storage.objects;
 
+drop policy if exists "media bucket: administradores control total" on storage.objects;
 create policy "media bucket: administradores control total" on storage.objects
 for all to authenticated
 using (bucket_id = 'media' and public.is_admin())
 with check (bucket_id = 'media' and public.is_admin());
 
+drop policy if exists "media bucket: photo uploaders upload images only" on storage.objects;
 create policy "media bucket: photo uploaders upload images only" on storage.objects
 for insert to authenticated
 with check (
@@ -164,6 +178,7 @@ with check (
     and public.is_member()
     and (storage.foldername(name))[1] = (auth.uid())::text
     and lower(storage.extension(name)) in ('jpg', 'jpeg', 'png', 'webp', 'avif')
+    and lower(coalesce(metadata->>'mimetype', '')) in ('image/jpeg', 'image/png', 'image/webp', 'image/avif')
 );
 
 -- Lilian assignment (run only after her Auth user and profile have been created):
