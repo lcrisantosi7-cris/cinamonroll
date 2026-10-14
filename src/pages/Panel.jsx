@@ -78,6 +78,32 @@ export default function Panel() {
 
     const currentSection = sections.find((item) => item.id === activeSection)
 
+    if (profile?.role === 'photo_uploader') {
+        return (
+            <section className="mx-auto max-w-5xl px-4 pb-12 pt-8 sm:pt-10">
+                <header className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-4xl border-2 border-kw-pink/30 bg-white/85 p-5 shadow-lg backdrop-blur sm:p-7">
+                    <div>
+                        <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-kw-pink-deep">
+                            Acceso limitado
+                        </p>
+                        <h1 className="mt-1 font-title text-4xl sm:text-5xl">Subir fotografías ♡</h1>
+                        <p className="mt-2 font-semibold text-kw-ink/75">
+                            Hola, {profile?.display_name || 'bienvenida'}. Desde aquí puedes añadir fotos a la galería.
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={lockEdit}
+                        className="inline-flex items-center gap-2 rounded-full bg-kw-pink-soft px-5 py-3 text-sm font-extrabold text-kw-pink-deep transition hover:bg-kw-pink hover:text-white active:scale-95"
+                    >
+                        <FiLock /> Bloquear acceso
+                    </button>
+                </header>
+                <NewMemory />
+            </section>
+        )
+    }
+
     return (
         <section className="mx-auto max-w-7xl px-4 pb-12 pt-8 sm:pt-10">
             <header className="mb-7 rounded-4xl border-2 border-kw-pink/30 bg-white/85 p-5 shadow-lg backdrop-blur sm:p-7">
