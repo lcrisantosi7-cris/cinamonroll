@@ -70,7 +70,52 @@ export default function MediaViewer({
         }
     }, [prev, next, urls])
 
-    // Teclado: flechas para navegar y Escape para cerrar.
+    // Bloquea el fondo sin perder la posición de scroll en móviles.
+    // El bloqueo vive durante todo el montaje del visor y no se reinicia
+    // al cambiar de recuerdo o cuando se actualizan las URL firmadas.
+    useEffect(() => {
+        const body = document.body
+        const html = document.documentElement
+        const scrollY = window.scrollY
+
+        const previous = {
+            bodyOverflow: body.style.overflow,
+            bodyPosition: body.style.position,
+            bodyTop: body.style.top,
+            bodyLeft: body.style.left,
+            bodyRight: body.style.right,
+            bodyWidth: body.style.width,
+            htmlOverflow: html.style.overflow,
+            htmlScrollBehavior: html.style.scrollBehavior,
+        }
+
+        // En Android, overflow:hidden por sí solo puede no bloquear
+        // correctamente el scroll del documento.
+        html.style.overflow = 'hidden'
+        html.style.scrollBehavior = 'auto'
+        body.style.overflow = 'hidden'
+        body.style.position = 'fixed'
+        body.style.top = `-${scrollY}px`
+        body.style.left = '0'
+        body.style.right = '0'
+        body.style.width = '100%'
+
+        return () => {
+            body.style.overflow = previous.bodyOverflow
+            body.style.position = previous.bodyPosition
+            body.style.top = previous.bodyTop
+            body.style.left = previous.bodyLeft
+            body.style.right = previous.bodyRight
+            body.style.width = previous.bodyWidth
+            html.style.overflow = previous.htmlOverflow
+
+            // Restaura la posición antes de devolver el scroll suave del sitio.
+            window.scrollTo(0, scrollY)
+            html.style.scrollBehavior = previous.htmlScrollBehavior
+        }
+    }, [])
+
+    // Los controles de teclado se actualizan aparte del bloqueo del scroll.
     useEffect(() => {
         const handleKeyDown = (event) => {
             if (event.key === 'Escape') {
@@ -90,15 +135,8 @@ export default function MediaViewer({
             }
         }
 
-        const previousOverflow = document.body.style.overflow
-        document.body.style.overflow = 'hidden'
-
         window.addEventListener('keydown', handleKeyDown)
-
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown)
-            document.body.style.overflow = previousOverflow
-        }
+        return () => window.removeEventListener('keydown', handleKeyDown)
     }, [onClose, onChange])
 
     if (!item) return null
@@ -230,6 +268,9 @@ export default function MediaViewer({
                                     src={imageSrc}
                                     alt={memory.title}
                                     draggable={false}
+                                    loading="eager"
+                                    decoding="async"
+                                    fetchPriority={hd ? 'high' : 'auto'}
                                     className="max-h-[58dvh] max-w-full rounded-2xl object-contain sm:max-h-[64dvh]"
                                 />
                             ) : (
