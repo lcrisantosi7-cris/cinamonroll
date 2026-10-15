@@ -189,10 +189,10 @@ export default function Gallery() {
                 {shown.map((item, i) => (
                     <motion.li
                         key={`${item.id}-${item.path_thumb}`}
-                        initial={{ opacity: 0, y: 24 }}
+                        initial={{ opacity: 0, y: 12 }}
                         whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, amount: 0.2 }}
-                        transition={{ duration: 0.4 }}
+                        viewport={{ once: true, amount: 0.15 }}
+                        transition={{ duration: 0.22 }}
                         className="mb-4 break-inside-avoid"
                     >
                         <button
@@ -252,7 +252,6 @@ export default function Gallery() {
             <AnimatePresence>
                 {open !== null && shown[open] && (
                     <MediaViewer
-                        key={`${shown[open].id}-${shown[open].path_thumb}`}
                         items={shown}
                         index={open}
                         onClose={close}
