@@ -16,13 +16,14 @@ export default function MediaViewer({
     onClose,
     onChange,
 }) {
-    const [hd, setHd] = useState(false)
+    const [hdPath, setHdPath] = useState(null)
 
     const count = items?.length ?? 0
     const safeIndex =
         count > 0 ? ((index % count) + count) % count : 0
 
     const item = items?.[safeIndex]
+    const hd = !!item?.path_full && hdPath === item.path_full
 
     const prev =
         count > 0 ? items[(safeIndex - 1 + count) % count] : null
@@ -49,10 +50,6 @@ export default function MediaViewer({
     ].filter(Boolean)
 
     const urls = useSignedUrls(paths)
-
-    useEffect(() => {
-        setHd(false)
-    }, [safeIndex])
 
     // Precarga las imágenes vecinas para que el cambio sea más fluido.
     useEffect(() => {
@@ -307,7 +304,7 @@ export default function MediaViewer({
                             item.path_full && (
                                 <button
                                     type="button"
-                                    onClick={() => setHd(true)}
+                                    onClick={() => setHdPath(item.path_full)}
                                     className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-kw-pink-soft px-3 py-2 text-xs font-bold text-kw-pink-deep transition hover:brightness-95 active:scale-95"
                                 >
                                     <FiMaximize2 />
