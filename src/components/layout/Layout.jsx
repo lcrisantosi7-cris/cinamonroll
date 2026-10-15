@@ -40,13 +40,13 @@ function Shell() {
             <Background />
             <Navbar />
 
-            <AnimatePresence mode="wait" initial={false} onExitComplete={() => window.scrollTo(0, 0)}>
+            <AnimatePresence mode="wait" initial={false} onExitComplete={() => window.scrollTo({ top: 0, left: 0, behavior: 'auto' })}>
                 <motion.main
                     key={location.pathname}
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -12 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ duration: 0.2 }}
                 >
                     <Suspense fallback={<PageLoader />}>{outlet}</Suspense>
                 </motion.main>
