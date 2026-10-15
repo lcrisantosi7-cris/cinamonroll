@@ -168,7 +168,7 @@ export default function MediaViewer({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-[60] flex flex-col bg-kw-ink/90 backdrop-blur-md"
+            className="fixed inset-0 z-[60] flex flex-col bg-kw-ink/95"
             role="dialog"
             aria-modal="true"
             aria-label="Visor de recuerdos"
@@ -286,7 +286,7 @@ export default function MediaViewer({
             {/* Información del recuerdo */}
             <div
                 onClick={stop}
-                className="relative z-20 max-h-[34dvh] overflow-y-auto rounded-t-4xl bg-white/95 px-5 pb-6 pt-4 shadow-2xl"
+                className="relative z-20 max-h-[34dvh] overflow-y-auto overscroll-contain rounded-t-4xl bg-white/95 px-5 pb-6 pt-4 shadow-2xl"
             >
                 <div className="mx-auto max-w-2xl">
                     <div className="flex items-start justify-between gap-3">
