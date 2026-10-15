@@ -15,7 +15,7 @@ export default function Navbar() {
     return (
         <header className="sticky top-0 z-40 px-3 pt-3 sm:px-6">
             <div
-                className={`mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-full border-2 border-white/80 bg-white/80 px-3 backdrop-blur-md transition-all duration-300 sm:px-5 ${compact ? 'py-1 shadow-xl shadow-sky-300/40' : 'py-2 shadow-lg shadow-sky-200/50'
+                className={`mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-full border-2 border-white/80 bg-white/95 px-3 backdrop-blur-none transition-all sm:bg-white/80 sm:backdrop-blur-md transition-all duration-300 sm:px-5 ${compact ? 'py-1 shadow-xl shadow-sky-300/40' : 'py-2 shadow-lg shadow-sky-200/50'
                     }`}
             >
                 <Link to="/" className="flex shrink-0 items-center gap-2">
