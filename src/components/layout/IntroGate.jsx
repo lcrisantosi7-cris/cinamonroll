@@ -11,9 +11,12 @@ export default function IntroGate({ onEnter }) {
     const player = usePlayer()
 
     useEffect(() => {
+        const previousOverflow = document.body.style.overflow
         document.body.style.overflow = 'hidden'
+
         return () => {
-            document.body.style.overflow = ''
+            // No borrar el bloqueo que pudiera pertenecer a otro modal.
+            document.body.style.overflow = previousOverflow
         }
     }, [])
 
