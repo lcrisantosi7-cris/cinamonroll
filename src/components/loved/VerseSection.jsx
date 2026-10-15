@@ -1,22 +1,30 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { FiBookOpen, FiHeart, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
+import {
+    FiBookOpen,
+    FiHeart,
+    FiChevronLeft,
+    FiChevronRight,
+    FiPause,
+    FiPlay,
+} from 'react-icons/fi'
 import { VERSES } from '../../data/verses'
 
 const verses = VERSES.filter((v) => v.text?.trim())
 
 export default function VerseSection() {
     const [i, setI] = useState(0)
+    const [isPaused, setIsPaused] = useState(false)
 
     useEffect(() => {
-        if (verses.length < 2) return
+        if (verses.length < 2 || isPaused) return
 
         const id = setInterval(() => {
             setI((current) => (current + 1) % verses.length)
         }, 10000)
 
         return () => clearInterval(id)
-    }, [])
+    }, [isPaused])
 
     if (!verses.length) return null
 
@@ -58,11 +66,17 @@ export default function VerseSection() {
                     }}
                 />
 
-                <span aria-hidden="true" className="pointer-events-none absolute left-5 top-4 font-serif text-7xl leading-none text-amber-200/20 sm:left-8 sm:top-6 sm:text-8xl">
+                <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute left-5 top-4 font-serif text-7xl leading-none text-amber-200/20 sm:left-8 sm:top-6 sm:text-8xl"
+                >
                     “
                 </span>
 
-                <span aria-hidden="true" className="pointer-events-none absolute bottom-3 right-5 font-serif text-7xl leading-none text-pink-200/20 sm:bottom-5 sm:right-8 sm:text-8xl">
+                <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute bottom-3 right-5 font-serif text-7xl leading-none text-pink-200/20 sm:bottom-5 sm:right-8 sm:text-8xl"
+                >
                     ”
                 </span>
 
@@ -93,11 +107,12 @@ export default function VerseSection() {
                 </div>
 
                 {verses.length > 1 && (
-                    <div className="relative mt-3 flex items-center justify-center gap-4">
+                    <div className="relative mt-3 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
                         <button
                             type="button"
                             onClick={() => changeVerse(-1)}
                             aria-label="Versículo anterior"
+                            title="Versículo anterior"
                             className="grid size-10 shrink-0 place-items-center rounded-full border border-white/15 bg-white/5 text-amber-100 transition hover:border-pink-200/50 hover:bg-pink-200/10 active:scale-90"
                         >
                             <FiChevronLeft className="text-xl" />
@@ -123,9 +138,38 @@ export default function VerseSection() {
                             type="button"
                             onClick={() => changeVerse(1)}
                             aria-label="Siguiente versículo"
+                            title="Siguiente versículo"
                             className="grid size-10 shrink-0 place-items-center rounded-full border border-white/15 bg-white/5 text-amber-100 transition hover:border-pink-200/50 hover:bg-pink-200/10 active:scale-90"
                         >
                             <FiChevronRight className="text-xl" />
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setIsPaused((paused) => !paused)}
+                            aria-label={
+                                isPaused
+                                    ? 'Reanudar carrusel automático'
+                                    : 'Pausar carrusel automático'
+                            }
+                            aria-pressed={isPaused}
+                            title={
+                                isPaused
+                                    ? 'Reanudar versículos'
+                                    : 'Pausar versículos'
+                            }
+                            className={`inline-flex h-10 items-center justify-center gap-2 rounded-full border px-4 text-sm font-bold transition active:scale-95 ${isPaused
+                                    ? 'border-amber-200/40 bg-amber-200/15 text-amber-100 hover:bg-amber-200/25'
+                                    : 'border-white/15 bg-white/5 text-indigo-100 hover:border-pink-200/40 hover:bg-pink-200/10'
+                                }`}
+                        >
+                            {isPaused ? (
+                                <FiPlay className="text-base" />
+                            ) : (
+                                <FiPause className="text-base" />
+                            )}
+
+                            <span>{isPaused ? 'Reanudar' : 'Pausar'}</span>
                         </button>
                     </div>
                 )}
@@ -133,6 +177,16 @@ export default function VerseSection() {
                 <p className="relative mt-5 text-center font-title text-sm text-pink-100/80 sm:text-base">
                     Palabras bonitas para guardar en el corazón ♡
                 </p>
+
+                {isPaused && verses.length > 1 && (
+                    <p
+                        role="status"
+                        className="relative mt-2 text-center text-xs font-medium text-amber-200/70"
+                    >
+                        <FiPause className="mr-1 inline-block" />
+                        Carrusel pausado
+                    </p>
+                )}
             </div>
         </section>
     )
