@@ -156,7 +156,7 @@ export default function BottomNav() {
                 aria-label="Navegación principal"
                 className="fixed inset-x-3 bottom-3 z-[46] pb-[env(safe-area-inset-bottom)] lg:hidden"
             >
-                <ul className="flex items-center justify-around rounded-full border-2 border-white/80 bg-white/85 p-1.5 shadow-xl shadow-sky-300/40 backdrop-blur-md">
+                <ul className="flex items-center justify-around rounded-full border-2 border-white/80 bg-white/95 p-1.5 shadow-xl shadow-sky-300/40 backdrop-blur-none sm:bg-white/85 sm:backdrop-blur-md">
                     {bar.map(({ to, label, icon: Icon }) => (
                         <li key={to}>
                             <NavLink
