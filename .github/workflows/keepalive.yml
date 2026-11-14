@@ -1,18 +1,42 @@
-name: keepalive
+name: Supabase Keepalive
+
 on:
   schedule:
-    - cron: '0 12 */3 * *'
+    # Cada 3 días a las 12:00 UTC (07:00 en Perú).
+    - cron: "0 12 */3 * *"
   workflow_dispatch:
+
 jobs:
   ping:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
+
     steps:
-      - name: Despertar Supabase
-        run: |
-          curl -fsS -X POST "$SUPABASE_URL/rest/v1/rpc/ping" \
-            -H "apikey: $SUPABASE_ANON_KEY" \
-            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
-            -H "Content-Type: application/json" -d '{}'
+      - name: Verificar secretos
+        shell: bash
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [[ -z "$SUPABASE_URL" || -z "$SUPABASE_ANON_KEY" ]]; then
+            echo "::error::Configura SUPABASE_URL y SUPABASE_ANON_KEY en GitHub Actions Secrets."
+            exit 1
+          fi
+
+      - name: Enviar ping a Supabase
+        shell: bash
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          SUPABASE_URL="${SUPABASE_URL%/}"
+
+          curl --fail-with-body --silent --show-error \
+            --retry 3 --retry-all-errors --retry-delay 5 --max-time 30 \
+            --request POST "$SUPABASE_URL/rest/v1/rpc/ping" \
+            --header "apikey: $SUPABASE_ANON_KEY" \
+            --header "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            --header "Content-Type: application/json" \
+            --data '{}'
+
+          echo "Ping enviado correctamente a Supabase."
